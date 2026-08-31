@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "contextflow-sdk"
+version = "0.1.0"
+description = "Stable-surface Python SDK for ContextFlow."
+readme = "../../README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.10"
+dependencies = ["contextflow>=0.1.0"]
+
+[tool.setuptools.packages.find]
+where = ["."]
