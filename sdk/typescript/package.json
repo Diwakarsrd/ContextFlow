@@ -1,0 +1,28 @@
+{
+  "name": "@contextflow/sdk",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for ContextFlow — talks to a running `contextflow serve` REST API.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "rag",
+    "context",
+    "mcp"
+  ],
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "vitest": "^5.0.0"
+  }
+}
