@@ -1,0 +1,255 @@
+# ContextBench v0.1 — "acme_support_v1"
+#
+# A synthetic customer-support + engineering knowledge base for a
+# fictional company ("Acme Corp"), built specifically to have
+# topically-similar distractor documents so retrieval quality is
+# actually being tested, not trivially maxed out. See
+# benchmarks/README.md for the full construction methodology and
+# honest limitations of this dataset.
+version: 1
+name: acme_support_v1
+
+corpus:
+  - id: doc_refund_policy
+    content: >
+      Acme's refund policy allows customers to request a full refund
+      within 30 days of purchase for any reason. After 30 days, refunds
+      are issued as store credit only, valid for 12 months.
+
+  - id: doc_refund_exceptions
+    content: >
+      Refund exceptions: custom enterprise contracts with annual billing
+      are non-refundable after the first 14 days per the signed order
+      form. Promotional or discounted purchases are refunded at the
+      discounted price actually paid, not list price.
+
+  - id: doc_billing_cycle
+    content: >
+      Acme bills monthly on the anniversary of the subscription start
+      date. Annual plans are billed once per year and include a 15%
+      discount versus monthly billing.
+
+  - id: doc_billing_failed_payment
+    content: >
+      If a payment fails, Acme retries the charge three times over seven
+      days. After the third failed attempt, the account is downgraded to
+      the free tier until payment succeeds.
+
+  - id: doc_support_hours
+    content: >
+      Support is available Monday through Friday, 9am to 6pm Eastern
+      Time, via chat and email. Enterprise customers on the Business
+      Critical plan have 24/7 phone support.
+
+  - id: doc_support_response_sla
+    content: >
+      Standard support tickets receive a first response within 24
+      business hours. Enterprise Business Critical tickets receive a
+      first response within 1 hour, 24/7.
+
+  - id: doc_payments_architecture
+    content: >
+      Acme's payments service uses Stripe for card processing. The
+      payments team owns this service. A migration from the legacy
+      billing system to Stripe-native subscriptions is planned for Q4.
+
+  - id: doc_payments_reconciliation
+    content: >
+      Nightly reconciliation jobs compare Stripe's ledger against Acme's
+      internal billing records and flag discrepancies over $1 for manual
+      review by the finance team.
+
+  - id: doc_auth_architecture
+    content: >
+      Acme's authentication service issues short-lived JWTs (15 minute
+      expiry) backed by refresh tokens stored in an HttpOnly cookie. SSO
+      via SAML is supported for Enterprise customers.
+
+  - id: doc_auth_password_reset
+    content: >
+      Password reset links expire after 1 hour and can only be used
+      once. Users are rate-limited to 5 reset requests per hour per
+      account to prevent abuse.
+
+  - id: doc_onboarding_new_customer
+    content: >
+      New customer onboarding includes a kickoff call within 3 business
+      days of signup, a dedicated Slack channel for Enterprise accounts,
+      and a 30-day check-in to review adoption metrics.
+
+  - id: doc_onboarding_data_import
+    content: >
+      Customers can import existing data via CSV upload or the
+      /v1/import API endpoint. Imports over 100,000 rows should use the
+      bulk import endpoint, which processes asynchronously.
+
+  - id: doc_api_rate_limits
+    content: >
+      The Acme API is rate-limited to 100 requests per minute per API
+      key on the standard tier, and 1,000 requests per minute on the
+      Enterprise tier. Rate limit headers are included on every response.
+
+  - id: doc_api_versioning
+    content: >
+      Acme's API is versioned via the URL path (/v1/, /v2/). Deprecated
+      versions are supported for 12 months after a new version ships,
+      with deprecation notices sent by email 90 days before sunset.
+
+  - id: doc_incident_payments_outage_2025
+    content: >
+      On March 3rd, a Stripe webhook processing delay caused payment
+      confirmations to lag by up to 20 minutes for approximately 4,000
+      customers. No payments were lost; the incident was resolved by
+      scaling the webhook consumer.
+
+  - id: doc_incident_auth_outage_2025
+    content: >
+      On June 12th, a certificate expiry on the authentication service
+      caused login failures for all users for approximately 35 minutes.
+      A post-incident review added automated certificate expiry alerts.
+
+  - id: doc_security_pii_handling
+    content: >
+      Customer PII (email, phone, billing address) is encrypted at rest
+      using AES-256 and in transit via TLS 1.2+. Access to raw PII
+      requires a documented business justification and is logged.
+
+  - id: doc_security_soc2
+    content: >
+      Acme maintains SOC 2 Type II compliance, audited annually.
+      Customers can request the current SOC 2 report through their
+      account representative under an NDA.
+
+  - id: doc_pricing_tiers
+    content: >
+      Acme offers three pricing tiers: Starter ($29/mo), Growth ($99/mo),
+      and Enterprise (custom pricing). Enterprise includes SSO, 24/7
+      support, and a dedicated customer success manager.
+
+  - id: doc_pricing_annual_discount
+    content: >
+      Switching from monthly to annual billing applies a 15% discount
+      immediately and pro-rates any remaining monthly billing period as
+      account credit.
+
+  - id: doc_feature_export
+    content: >
+      Customers can export their full account data as a ZIP archive
+      containing CSV files, available under Settings > Data Export. The
+      export is generated asynchronously and emailed as a download link.
+
+  - id: doc_feature_webhooks
+    content: >
+      Acme supports outbound webhooks for account.updated,
+      payment.succeeded, and payment.failed events. Webhook endpoints
+      must respond with a 2xx status within 5 seconds or the delivery is
+      retried with exponential backoff.
+
+  - id: doc_deprecation_v1_api
+    content: >
+      The /v1/ API is deprecated as of January 2026 and will be
+      sunset in January 2027. All new integrations should use /v2/,
+      which adds cursor-based pagination and idempotency keys.
+
+  - id: doc_engineering_oncall
+    content: >
+      Engineering on-call rotates weekly across the platform team.
+      Sev1 incidents page the on-call engineer immediately; Sev2 and
+      below are triaged during business hours the next day.
+
+  - id: doc_engineering_deploy_process
+    content: >
+      Deploys to production require a passing CI run, one approving
+      code review, and are gated behind a feature flag for gradual
+      rollout starting at 5% of traffic.
+
+  - id: doc_data_retention_policy
+    content: >
+      Account data is retained for 90 days after account cancellation,
+      after which it is permanently deleted. Backups are retained for
+      an additional 30 days beyond that for disaster recovery only.
+
+  - id: doc_gdpr_data_deletion
+    content: >
+      EU customers can request full data deletion under GDPR Article 17.
+      Requests are processed within 30 days and confirmed by email once
+      complete, superseding the standard 90-day retention policy.
+
+  - id: doc_mobile_app_support
+    content: >
+      The Acme mobile app (iOS and Android) supports read-only access to
+      account data and push notifications for payment failures. Full
+      account management requires the web dashboard.
+
+  - id: doc_integration_slack
+    content: >
+      The Acme-Slack integration posts payment and account alerts to a
+      configured channel. It requires the workspace admin to authorize
+      OAuth scopes for channel posting.
+
+  - id: doc_integration_salesforce
+    content: >
+      The Salesforce integration syncs Acme account and billing status
+      into a custom Salesforce object every 15 minutes, one-way
+      (Acme to Salesforce only).
+
+queries:
+  - query: "What is the refund policy?"
+    relevant_ids: [doc_refund_policy, doc_refund_exceptions]
+
+  - query: "Are enterprise contracts refundable?"
+    relevant_ids: [doc_refund_exceptions]
+
+  - query: "When can I contact support?"
+    relevant_ids: [doc_support_hours]
+
+  - query: "What's the SLA for support ticket response time?"
+    relevant_ids: [doc_support_response_sla]
+
+  - query: "What payment processor does Acme use?"
+    relevant_ids: [doc_payments_architecture]
+
+  - query: "How does Acme reconcile payment records?"
+    relevant_ids: [doc_payments_reconciliation]
+
+  - query: "How long do password reset links last?"
+    relevant_ids: [doc_auth_password_reset]
+
+  - query: "Tell me about the June authentication outage"
+    relevant_ids: [doc_incident_auth_outage_2025]
+
+  - query: "Tell me about the payments incident in March"
+    relevant_ids: [doc_incident_payments_outage_2025]
+
+  - query: "What are the API rate limits?"
+    relevant_ids: [doc_api_rate_limits]
+
+  - query: "How is customer PII protected?"
+    relevant_ids: [doc_security_pii_handling]
+
+  - query: "What are the pricing tiers?"
+    relevant_ids: [doc_pricing_tiers, doc_pricing_annual_discount]
+
+  - query: "How do I get a discount for annual billing?"
+    relevant_ids: [doc_pricing_annual_discount]
+
+  - query: "How does GDPR data deletion work?"
+    relevant_ids: [doc_gdpr_data_deletion]
+    # Graded relevance example: the retention policy doc is topically
+    # related (both are about data deletion timelines) but less directly
+    # responsive than the GDPR-specific doc, which explicitly overrides it.
+    relevance:
+      doc_gdpr_data_deletion: 3
+      doc_data_retention_policy: 1
+
+  - query: "What webhooks does Acme support?"
+    relevant_ids: [doc_feature_webhooks]
+
+  - query: "Is the v1 API going away?"
+    relevant_ids: [doc_deprecation_v1_api, doc_api_versioning]
+
+  - query: "How does on-call work for engineering?"
+    relevant_ids: [doc_engineering_oncall]
+
+  - query: "What happens when a payment fails?"
+    relevant_ids: [doc_billing_failed_payment]
