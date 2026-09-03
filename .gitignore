@@ -1,0 +1,21 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.env
+.contextos/
+contextos_audit.log
+node_modules/
+dist/
+*.log
+.DS_Store
+
+# External benchmark datasets are downloaded at runtime, not committed
+# (e.g. LoCoMo is CC BY-NC 4.0 — see benchmarks/external/locomo/RESULTS.md)
+benchmarks/external/**/*.json
