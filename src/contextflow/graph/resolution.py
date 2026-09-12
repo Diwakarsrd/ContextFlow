@@ -1,0 +1,2 @@
+class EntityResolver:
+    pass
