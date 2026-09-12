@@ -33,7 +33,7 @@ dependencies = [
 
 [project.optional-dependencies]
 postgres = ["psycopg[binary]>=3.1", "pgvector>=0.2"]
-qdrant = ["qdrant-client>=1.9"]
+qdrant = ["qdrant-client>=1.19.0"]
 neo4j = ["neo4j>=5.19"]
 openai = ["openai>=1.30"]
 spacy = ["spacy>=3.7"]  # also needs: python -m spacy download en_core_web_md
