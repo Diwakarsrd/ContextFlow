@@ -1,4 +1,3 @@
-from typing import List
 
 class QueryExpander:
     """Phase 2 Core: Query Expansion and Synonym Mapping."""
@@ -9,7 +8,7 @@ class QueryExpander:
             'bug': ['defect', 'issue', 'ticket']
         }
         
-    def expand(self, query: str) -> List[str]:
+    def expand(self, query: str) -> list[str]:
         variations = [query]
         words = query.lower().split()
         syn_variation = [self.synonyms.get(w, [w])[0] for w in words]
