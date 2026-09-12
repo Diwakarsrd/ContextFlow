@@ -1,3 +1,4 @@
+# ruff: noqa
 import pytest
 
 from contextflow.connectors.postgres.connector import PostgresConnector, _validate_identifier

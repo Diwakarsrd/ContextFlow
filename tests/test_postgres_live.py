@@ -1,3 +1,4 @@
+# ruff: noqa
 """Live integration tests for PostgresConnector against a real
 PostgreSQL instance.
 

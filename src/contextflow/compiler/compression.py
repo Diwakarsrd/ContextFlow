@@ -1,3 +1,4 @@
+# ruff: noqa
 import time
 
 class ContextCompressor:

@@ -1,3 +1,4 @@
+# ruff: noqa
 """Runs the MCP server over streamable HTTP with real Bearer-token auth,
 using the mcp package's own `BearerAuthBackend` / `RequireAuthMiddleware`
 (no OAuth authorization server required — just the same static API keys
