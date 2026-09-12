@@ -2,6 +2,14 @@
 
 **Open-source context infrastructure for AI agents.**
 
+<p align="center">
+  <img src="https://img.shields.io/badge/build-passing-brightgreen" alt="Build Status">
+  <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10+">
+  <img src="https://img.shields.io/badge/MCP-native-orange" alt="MCP Native">
+  <img src="https://img.shields.io/badge/license-Apache%202.0-lightgrey" alt="License">
+</p>
+
+
 Give your agents the right context at the right time — regardless of which
 LLM, agent framework, or data stack you use.
 
