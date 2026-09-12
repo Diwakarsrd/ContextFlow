@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: contextos
+          POSTGRES_PASSWORD: contextos
+          POSTGRES_DB: contextos_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      CONTEXTOS_TEST_POSTGRES_DSN: postgresql://contextos:contextos@localhost:5432/contextos_test
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install -e ".[dev,postgres]"
+      - run: ruff check .
+      - run: mypy src
+      - run: pytest -v
+
+  typescript-sdk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e .
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - working-directory: sdk/typescript
+        run: npm install
+      - working-directory: sdk/typescript
+        run: npm run typecheck
+      - working-directory: sdk/typescript
+        run: npm run build
+      - working-directory: sdk/typescript
+        run: npm test
