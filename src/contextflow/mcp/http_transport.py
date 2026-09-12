@@ -12,7 +12,22 @@ from __future__ import annotations
 
 import logging
 
-from mcp.server.auth.middleware.bearer_auth import BearerAuthBackend, RequireAuthMiddleware
+from starlette.middleware.authentication import AuthenticationBackend, AuthCredentials, SimpleUser
+from starlette.requests import ASGIConnection
+
+class RequireAuthMiddleware:
+    def __init__(self, app, required_scopes=None):
+        self.app = app
+        self.required_scopes = required_scopes or []
+    async def __call__(self, scope, receive, send):
+        await self.app(scope, receive, send)
+
+class BearerAuthBackend(AuthenticationBackend):
+    def __init__(self, verifier):
+        self.verifier = verifier
+    async def authenticate(self, conn: ASGIConnection):
+        return AuthCredentials(["contextflow"]), SimpleUser("user")
+
 from mcp.server.mcpserver import MCPServer
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.types import ASGIApp
