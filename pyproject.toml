@@ -39,7 +39,7 @@ openai = ["openai>=1.30"]
 spacy = ["spacy>=3.7"]  # also needs: python -m spacy download en_core_web_md
 dev = [
     "pytest>=8.0",
-    "pytest-asyncio>=0.23",
+    "pytest-asyncio>=1.4.0",
     "ruff>=0.4",
     "mypy>=1.10",
     "pre-commit>=3.7",
