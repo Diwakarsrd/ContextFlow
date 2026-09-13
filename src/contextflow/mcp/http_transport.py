@@ -13,8 +13,8 @@ from __future__ import annotations
 
 import logging
 
-from starlette.middleware.authentication import AuthenticationBackend, AuthCredentials, SimpleUser
-from starlette.requests import ASGIConnection
+from starlette.authentication import AuthCredentials, AuthenticationBackend, SimpleUser
+from starlette.requests import HTTPConnection
 
 class RequireAuthMiddleware:
     def __init__(self, app, required_scopes=None):
@@ -26,7 +26,7 @@ class RequireAuthMiddleware:
 class BearerAuthBackend(AuthenticationBackend):
     def __init__(self, verifier):
         self.verifier = verifier
-    async def authenticate(self, conn: ASGIConnection):
+    async def authenticate(self, conn: HTTPConnection):
         return AuthCredentials(["contextflow"]), SimpleUser("user")
 
 from mcp.server.mcpserver import MCPServer
