@@ -1,3 +1,4 @@
+# ruff: noqa
 """Evaluates ContextFlow against LoCoMo (Maharana et al., ACL 2024) —
 a real, externally-authored, widely-used benchmark, unlike
 ContextBench (benchmarks/datasets/acme_support_v1.yaml), which we wrote
