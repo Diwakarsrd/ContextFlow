@@ -5,8 +5,8 @@ Unlike naive RAG systems that truncate text arbitrarily, the ContextCompressor
 attempts to preserve semantic boundaries (sentences) and applies mathematical 
 decay properties to historical memories.
 """
-import time
 import logging
+import time
 from typing import Final
 
 logger = logging.getLogger("contextflow.compiler.compression")

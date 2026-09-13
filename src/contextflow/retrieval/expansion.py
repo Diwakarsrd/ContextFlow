@@ -6,8 +6,8 @@ While the default implementation uses a static ruleset for zero-dependency execu
 production environments should inject an LLM-backed or Knowledge-Graph-backed expander
 that conforms to the QueryExpander protocol.
 """
-from typing import Protocol, runtime_checkable
 import logging
+from typing import Protocol, runtime_checkable
 
 logger = logging.getLogger("contextflow.retrieval.expansion")
 
