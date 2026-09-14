@@ -4,11 +4,12 @@ Discord Connector for ContextFlow.
 Extracts server messages and threads to provide conversational context.
 """
 
-from typing import Any
-from collections.abc import Iterable
-import time
-import requests
 import logging
+import time
+from collections.abc import Iterable
+from typing import Any
+
+import requests
 
 from contextflow.connectors.base import Connector
 from contextflow.core.context import ContextObject
@@ -40,8 +41,7 @@ class DiscordConnector(Connector):
         if self._mock_mode:
             yield "mock_channel"
         else:
-            for channel in self.target_channels:
-                yield channel
+            yield from self.target_channels
 
     def fetch(self, resource_id: str) -> Iterable[dict[str, Any]]:
         if self._mock_mode:

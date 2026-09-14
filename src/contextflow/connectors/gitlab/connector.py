@@ -4,11 +4,12 @@ GitLab Connector for ContextFlow.
 Extracts repositories, issues, and merge requests.
 """
 
-from typing import Any
-from collections.abc import Iterable
-import time
-import requests
 import logging
+import time
+from collections.abc import Iterable
+from typing import Any
+
+import requests
 
 from contextflow.connectors.base import Connector
 from contextflow.core.context import ContextObject
