@@ -69,7 +69,10 @@ class SlackConnector(Connector):
         cursor = None
         while wanted:
             data = self._call(
-                "conversations.list", limit=200, cursor=cursor, types="public_channel,private_channel"
+                "conversations.list",
+                limit=200,
+                cursor=cursor,
+                types="public_channel,private_channel",
             )
             for channel in data.get("channels", []):
                 if channel.get("name") in wanted:

@@ -50,8 +50,14 @@ def _mock_transport() -> httpx.MockTransport:
                     200,
                     json={
                         "results": [
-                            {"type": "paragraph", "paragraph": {"rich_text": _rich_text("Stripe was selected.")}},
-                            {"type": "heading_1", "heading_1": {"rich_text": _rich_text("Timeline")}},
+                            {
+                                "type": "paragraph",
+                                "paragraph": {"rich_text": _rich_text("Stripe was selected.")},
+                            },
+                            {
+                                "type": "heading_1",
+                                "heading_1": {"rich_text": _rich_text("Timeline")},
+                            },
                         ],
                         "has_more": True,
                         "next_cursor": "page2",
@@ -61,7 +67,10 @@ def _mock_transport() -> httpx.MockTransport:
                 200,
                 json={
                     "results": [
-                        {"type": "bulleted_list_item", "bulleted_list_item": {"rich_text": _rich_text("Migration in Q4")}},
+                        {
+                            "type": "bulleted_list_item",
+                            "bulleted_list_item": {"rich_text": _rich_text("Migration in Q4")},
+                        },
                         {"type": "divider", "divider": {}},  # no rich_text -> should be skipped
                     ],
                     "has_more": False,
@@ -80,7 +89,10 @@ def _mock_transport() -> httpx.MockTransport:
                             "properties": {
                                 "Name": {"type": "title", "title": _rich_text("Acme Corp")},
                                 "Plan": {"type": "select", "select": {"name": "Enterprise"}},
-                                "Tags": {"type": "multi_select", "multi_select": [{"name": "priority"}, {"name": "renewal"}]},
+                                "Tags": {
+                                    "type": "multi_select",
+                                    "multi_select": [{"name": "priority"}, {"name": "renewal"}],
+                                },
                             },
                         }
                     ],
@@ -101,25 +113,36 @@ def _connector(**config) -> NotionConnector:
     connector = NotionConnector(config={"token": "secret_fake", **config})
     connector.authenticate()
     connector._client = httpx.Client(
-        base_url="https://api.notion.com/v1", transport=_mock_transport(), headers=connector._client.headers
+        base_url="https://api.notion.com/v1",
+        transport=_mock_transport(),
+        headers=connector._client.headers,
     )
     return connector
 
 
 def test_extract_plain_text_handles_various_block_types():
-    assert _extract_plain_text({"type": "paragraph", "paragraph": {"rich_text": _rich_text("hi")}}) == "hi"
+    assert (
+        _extract_plain_text({"type": "paragraph", "paragraph": {"rich_text": _rich_text("hi")}})
+        == "hi"
+    )
     assert _extract_plain_text({"type": "divider", "divider": {}}) == ""
     assert _extract_plain_text({}) == ""
 
 
 def test_extract_property_text_handles_common_types():
-    assert _extract_property_text({"type": "select", "select": {"name": "Enterprise"}}) == "Enterprise"
+    assert (
+        _extract_property_text({"type": "select", "select": {"name": "Enterprise"}}) == "Enterprise"
+    )
     assert _extract_property_text({"type": "select", "select": None}) == ""
     assert (
-        _extract_property_text({"type": "multi_select", "multi_select": [{"name": "a"}, {"name": "b"}]})
+        _extract_property_text(
+            {"type": "multi_select", "multi_select": [{"name": "a"}, {"name": "b"}]}
+        )
         == "a, b"
     )
-    assert _extract_property_text({"type": "relation"}) == ""  # unrecognized type -> skipped, not guessed
+    assert (
+        _extract_property_text({"type": "relation"}) == ""
+    )  # unrecognized type -> skipped, not guessed
 
 
 def test_discover_via_search_finds_pages_and_databases():
@@ -164,7 +187,13 @@ def test_normalize_page_and_database_row():
     assert "Title" in page_obj.content and "body text" in page_obj.content
 
     row_obj = connector.normalize(
-        {"kind": "database_row", "id": "R1", "database_id": "DB1", "fields": {"Name": "Acme"}, "url": "u"}
+        {
+            "kind": "database_row",
+            "id": "R1",
+            "database_id": "DB1",
+            "fields": {"Name": "Acme"},
+            "url": "u",
+        }
     )
     assert row_obj.type == "record"
     assert "Acme" in row_obj.content
@@ -189,7 +218,9 @@ def test_full_engine_sync_and_retrieve_end_to_end():
     connector.authenticate = lambda: setattr(
         connector,
         "_client",
-        httpx.Client(base_url="https://api.notion.com/v1", headers=headers, transport=_mock_transport()),
+        httpx.Client(
+            base_url="https://api.notion.com/v1", headers=headers, transport=_mock_transport()
+        ),
     )
 
     engine = ContextEngine()

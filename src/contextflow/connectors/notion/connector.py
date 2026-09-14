@@ -221,7 +221,11 @@ class NotionConnector(Connector):
                 type="document",
                 content=content,
                 source=self.name,
-                metadata={"notion_id": raw_record["id"], "url": raw_record.get("url"), "kind": "page"},
+                metadata={
+                    "notion_id": raw_record["id"],
+                    "url": raw_record.get("url"),
+                    "kind": "page",
+                },
             )
 
         fields = raw_record["fields"]

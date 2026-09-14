@@ -12,7 +12,10 @@ def test_file_vector_store_batch_matches_individual_upserts(tmp_path):
     batched.upsert_batch([(f"id{i}", [float(i)], {"n": i}) for i in range(5)])
 
     for i in range(5):
-        assert individual.search([float(i)], limit=1)[0][0] == batched.search([float(i)], limit=1)[0][0]
+        assert (
+            individual.search([float(i)], limit=1)[0][0]
+            == batched.search([float(i)], limit=1)[0][0]
+        )
 
 
 def test_file_vector_store_batch_writes_disk_once(tmp_path):
@@ -44,7 +47,7 @@ def test_file_graph_store_batch_persists_to_disk(tmp_path):
     path = tmp_path / "graph.json"
     store = FileGraphStore(str(path))
     store.add_entities_batch([(f"e{i}", {}) for i in range(10)])
-    store.add_relationships_batch([(f"e{i}", f"e{i+1}", "co_mentioned", 1.0) for i in range(9)])
+    store.add_relationships_batch([(f"e{i}", f"e{i + 1}", "co_mentioned", 1.0) for i in range(9)])
 
     reloaded = FileGraphStore(str(path))
     assert reloaded.get_entity("e5") is not None

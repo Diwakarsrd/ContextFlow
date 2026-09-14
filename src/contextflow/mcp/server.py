@@ -20,9 +20,7 @@ from contextflow.memory.store import MemoryStore
 try:
     from mcp.server.mcpserver import MCPServer as FastMCP
 except ImportError as exc:  # pragma: no cover
-    raise ImportError(
-        "The MCP server requires the `mcp` package (pip install mcp)"
-    ) from exc
+    raise ImportError("The MCP server requires the `mcp` package (pip install mcp)") from exc
 
 
 def build_server(
@@ -61,7 +59,9 @@ def build_server(
         return engine.get_context_graph(entity_id, depth=depth)
 
     @server.tool()
-    def get_memory(scope: str, scope_id: str, query: str | None = None, limit: int = 10) -> list[dict]:
+    def get_memory(
+        scope: str, scope_id: str, query: str | None = None, limit: int = 10
+    ) -> list[dict]:
         """Recall facts from memory. `scope` is one of session/user/agent/org;
         `scope_id` identifies which session/user/agent/org. Ranked by
         keyword relevance if `query` is given, else most-recent-first."""
@@ -93,7 +93,9 @@ def build_server(
         if obj is None:
             return {"error": "not found"}
 
-        base_score = obj.metadata.get("_semantic_score") or obj.metadata.get("_keyword_score") or 0.0
+        base_score = (
+            obj.metadata.get("_semantic_score") or obj.metadata.get("_keyword_score") or 0.0
+        )
         reranker = engine.reranker
         freshness_weight = getattr(reranker, "freshness_weight", None)
         confidence_weight = getattr(reranker, "confidence_weight", None)
@@ -104,7 +106,11 @@ def build_server(
             "trust_weight": trust_weight,
         }
         final_score = base_score
-        if freshness_weight is not None and confidence_weight is not None and trust_weight is not None:
+        if (
+            freshness_weight is not None
+            and confidence_weight is not None
+            and trust_weight is not None
+        ):
             final_score = (
                 base_score
                 + freshness_weight * obj.freshness

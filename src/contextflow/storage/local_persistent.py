@@ -35,9 +35,7 @@ class FileVectorStore(VectorStore):
             self._payloads = data.get("payloads", {})
 
     def _save(self) -> None:
-        self.path.write_text(
-            json.dumps({"vectors": self._vectors, "payloads": self._payloads})
-        )
+        self.path.write_text(json.dumps({"vectors": self._vectors, "payloads": self._payloads}))
 
     def upsert(self, id: str, embedding: list[float], payload: dict[str, Any]) -> None:
         self._vectors[id] = embedding
@@ -82,9 +80,7 @@ class FileGraphStore(GraphStore):
             self._edges = data.get("edges", [])
 
     def _save(self) -> None:
-        self.path.write_text(
-            json.dumps({"entities": self._entities, "edges": self._edges})
-        )
+        self.path.write_text(json.dumps({"entities": self._entities, "edges": self._edges}))
 
     def add_entity(self, entity_id: str, attributes: dict[str, Any]) -> None:
         self._add_entity_no_save(entity_id, attributes)
@@ -127,9 +123,7 @@ class FileGraphStore(GraphStore):
             {"source": source_id, "target": target_id, "type": rel_type, "weight": weight}
         )
 
-    def add_relationships_batch(
-        self, relationships: list[tuple[str, str, str, float]]
-    ) -> None:
+    def add_relationships_batch(self, relationships: list[tuple[str, str, str, float]]) -> None:
         for source_id, target_id, rel_type, weight in relationships:
             self._add_relationship_no_save(source_id, target_id, rel_type, weight)
         self._save()

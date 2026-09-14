@@ -18,8 +18,26 @@ import re
 _PROPER_NOUN_RUN = re.compile(r"\b([A-Z][a-zA-Z0-9]*(?:\s+[A-Z][a-zA-Z0-9]*){0,3})\b")
 
 _STOPWORDS = {
-    "The", "This", "That", "These", "Those", "A", "An", "It", "We", "I",
-    "You", "They", "He", "She", "In", "On", "At", "For", "With", "As",
+    "The",
+    "This",
+    "That",
+    "These",
+    "Those",
+    "A",
+    "An",
+    "It",
+    "We",
+    "I",
+    "You",
+    "They",
+    "He",
+    "She",
+    "In",
+    "On",
+    "At",
+    "For",
+    "With",
+    "As",
 }
 
 

@@ -21,7 +21,9 @@ import os
 
 import pytest
 
-psycopg = pytest.importorskip("psycopg", reason="psycopg not installed (pip install 'contextflow[postgres]')")
+psycopg = pytest.importorskip(
+    "psycopg", reason="psycopg not installed (pip install 'contextflow[postgres]')"
+)
 
 from contextflow.connectors.postgres.connector import PostgresConnector
 from contextflow.engine import ContextEngine
@@ -58,9 +60,7 @@ def pg_conn():
 
 def _seed(pg_conn) -> None:
     with pg_conn.cursor() as cur:
-        cur.execute(
-            "CREATE TABLE test_customers (id SERIAL PRIMARY KEY, name TEXT, notes TEXT)"
-        )
+        cur.execute("CREATE TABLE test_customers (id SERIAL PRIMARY KEY, name TEXT, notes TEXT)")
         cur.execute(
             "INSERT INTO test_customers (name, notes) VALUES (%s, %s), (%s, %s)",
             ("Acme Corp", "Uses Stripe, migration planned Q4", "Widgets Inc", "Annual renewal"),

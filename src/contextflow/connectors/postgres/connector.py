@@ -19,9 +19,7 @@ from typing import Any
 from contextflow.connectors.base import Connector
 from contextflow.core.context import ContextObject
 
-_IDENTIFIER_ALLOWED = set(
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_."
-)
+_IDENTIFIER_ALLOWED = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.")
 
 
 def _validate_identifier(name: str) -> str:

@@ -33,9 +33,7 @@ class OpenAIEmbeddingProvider(EmbeddingProvider):
     ) -> None:
         key = api_key or os.environ.get("OPENAI_API_KEY")
         if not key:
-            raise RuntimeError(
-                "OpenAIEmbeddingProvider requires api_key or $OPENAI_API_KEY"
-            )
+            raise RuntimeError("OpenAIEmbeddingProvider requires api_key or $OPENAI_API_KEY")
         self.model = model
         self.dimensions = _DIMENSIONS.get(model, 1536)
         self._client = httpx.Client(

@@ -24,4 +24,6 @@ class StaticAPIKeyVerifier(TokenVerifier):
         principal = self.store.verify(token)
         if principal is None:
             return None
-        return AccessToken(token=token, client_id=principal, scopes=["contextflow"], subject=principal)
+        return AccessToken(
+            token=token, client_id=principal, scopes=["contextflow"], subject=principal
+        )

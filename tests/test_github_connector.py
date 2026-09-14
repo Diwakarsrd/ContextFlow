@@ -39,9 +39,7 @@ def _mock_transport() -> httpx.MockTransport:
 def test_github_connector_fetch_and_normalize():
     connector = GitHubConnector(config={"token": "fake", "repos": ["acme/widgets"]})
     connector.authenticate()
-    connector._client = httpx.Client(
-        base_url="https://api.github.com", transport=_mock_transport()
-    )
+    connector._client = httpx.Client(base_url="https://api.github.com", transport=_mock_transport())
 
     raw_records = list(connector.fetch("acme/widgets"))
     kinds = {r["kind"] for r in raw_records}
@@ -67,7 +65,9 @@ def test_full_engine_sync_and_retrieve_end_to_end():
 
     connector = GitHubConnector(config={"token": "fake", "repos": ["acme/widgets"]})
     connector.authenticate = lambda: setattr(
-        connector, "_client", httpx.Client(base_url="https://api.github.com", transport=_mock_transport())
+        connector,
+        "_client",
+        httpx.Client(base_url="https://api.github.com", transport=_mock_transport()),
     )
 
     engine = ContextEngine()

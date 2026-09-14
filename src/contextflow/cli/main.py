@@ -1,11 +1,11 @@
 """The `contextflow` CLI.
 
-    contextflow init
-    contextflow ingest ./docs
-    contextflow search "payments architecture"
-    contextflow serve
-    contextflow mcp
-    contextflow evaluate --benchmark benchmarks/datasets/acme_support_v1.yaml
+contextflow init
+contextflow ingest ./docs
+contextflow search "payments architecture"
+contextflow serve
+contextflow mcp
+contextflow evaluate --benchmark benchmarks/datasets/acme_support_v1.yaml
 """
 
 from __future__ import annotations
@@ -74,7 +74,9 @@ def demo() -> None:
         table.add_row(obj.source, obj.content[:100] + ("…" if len(obj.content) > 100 else ""))
     console.print(table)
 
-    console.print('\n[bold]$ contextflow context-pack[/] "What decisions were made about payments?"')
+    console.print(
+        '\n[bold]$ contextflow context-pack[/] "What decisions were made about payments?"'
+    )
     pack = engine.context_pack("What decisions were made about payments?", max_tokens=1000)
     lines = [f"[bold]Query:[/] {pack.task}"]
     for bucket_name in ["facts", "documents", "conversations", "decisions", "risks"]:
@@ -91,7 +93,7 @@ def demo() -> None:
 
     console.print(
         f"\n[dim]Demo workspace is at ./{demo_dir}/ — re-run "
-        f"`contextflow search \"<query>\" --path {demo_dir}/.contextflow` yourself, "
+        f'`contextflow search "<query>" --path {demo_dir}/.contextflow` yourself, '
         f"or delete the directory when done.[/]"
     )
 
@@ -184,8 +186,12 @@ def trace(
     lines = [f"[bold]Query:[/] {query}", ""]
     for stage in trace_obj.stages:
         arrow = " " * 4 + "↓"
-        detail_str = f" ({', '.join(f'{k}={v}' for k, v in stage.details.items())})" if stage.details else ""
-        lines.append(f"{stage.count_out} after {stage.name}{detail_str}  [{stage.duration_ms:.1f}ms]")
+        detail_str = (
+            f" ({', '.join(f'{k}={v}' for k, v in stage.details.items())})" if stage.details else ""
+        )
+        lines.append(
+            f"{stage.count_out} after {stage.name}{detail_str}  [{stage.duration_ms:.1f}ms]"
+        )
         lines.append(arrow)
     if lines[-1].strip() == "↓":
         lines.pop()  # no trailing arrow after the last stage
@@ -212,7 +218,9 @@ def serve(
 
 @app.command()
 def mcp(
-    transport: str = typer.Option("stdio", help="'stdio' (default, local) or 'http' (remote agents)"),
+    transport: str = typer.Option(
+        "stdio", help="'stdio' (default, local) or 'http' (remote agents)"
+    ),
     host: str = typer.Option("127.0.0.1"),
     port: int = typer.Option(8765),
 ) -> None:
@@ -271,9 +279,15 @@ def auth_revoke_key(
 
 @app.command()
 def evaluate(
-    benchmark: str = typer.Option("benchmarks/datasets/acme_support_v1.yaml", help="Path to benchmark file"),
-    output: str = typer.Option(None, help="Save results as JSON to this path (for later comparison)"),
-    compare_to: str = typer.Option(None, help="Compare against a previously saved result JSON file"),
+    benchmark: str = typer.Option(
+        "benchmarks/datasets/acme_support_v1.yaml", help="Path to benchmark file"
+    ),
+    output: str = typer.Option(
+        None, help="Save results as JSON to this path (for later comparison)"
+    ),
+    compare_to: str = typer.Option(
+        None, help="Compare against a previously saved result JSON file"
+    ),
 ) -> None:
     """Run the ContextBench evaluation harness against a benchmark dataset."""
     from contextflow.evaluation.benchmarks import (
@@ -304,7 +318,9 @@ def evaluate(
         for metric, delta in deltas.items():
             sign = "+" if delta >= 0 else ""
             style = "green" if delta > 0 else ("red" if delta < 0 else "")
-            delta_table.add_row(metric, f"[{style}]{sign}{delta:.3f}[/]" if style else f"{sign}{delta:.3f}")
+            delta_table.add_row(
+                metric, f"[{style}]{sign}{delta:.3f}[/]" if style else f"{sign}{delta:.3f}"
+            )
         console.print(delta_table)
 
     if output:
@@ -359,7 +375,9 @@ def memory_remember(
 def memory_recall(
     scope: str = typer.Argument(..., help="session | user | agent | org"),
     scope_id: str = typer.Argument(..., help="Identifier within that scope"),
-    query: str = typer.Option(None, help="Optional keyword query; omit to list all, most recent first"),
+    query: str = typer.Option(
+        None, help="Optional keyword query; omit to list all, most recent first"
+    ),
     limit: int = typer.Option(10),
 ) -> None:
     """Recall facts from memory."""
@@ -413,7 +431,9 @@ def audit_query(
 @app.command(name="benchmark-scale")
 def benchmark_scale(
     sizes: str = typer.Option("100,500,1000,2000", help="Comma-separated corpus sizes to test"),
-    persistent: bool = typer.Option(False, help="Use the persistent (SQLite+file) backend instead of in-memory"),
+    persistent: bool = typer.Option(
+        False, help="Use the persistent (SQLite+file) backend instead of in-memory"
+    ),
 ) -> None:
     """Measure real ingestion throughput and retrieval latency at
     increasing corpus sizes. See benchmarks/performance/results.md for
@@ -426,13 +446,17 @@ def benchmark_scale(
     size_list = [int(s.strip()) for s in sizes.split(",")]
 
     if persistent:
+
         def factory():
             return local_workspace(tempfile.mkdtemp())
     else:
+
         def factory():
             return ContextEngine()
 
-    console.print(f"Running scale sweep: {size_list} ({'persistent' if persistent else 'in-memory'} backend)...")
+    console.print(
+        f"Running scale sweep: {size_list} ({'persistent' if persistent else 'in-memory'} backend)..."
+    )
     result = run_scale_sweep(size_list, factory)
 
     table = Table(title="Performance / Scale Benchmark")

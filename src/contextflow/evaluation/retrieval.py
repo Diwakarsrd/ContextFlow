@@ -52,7 +52,11 @@ def ndcg_at_k(retrieved_ids: list[str], relevance: dict[str, float], k: int) -> 
     in `relevance` has a positive grade."""
     dcg = dcg_at_k(retrieved_ids, relevance, k)
     ideal_order = sorted(relevance.values(), reverse=True)[:k]
-    idcg = sum((2**rel - 1) / math.log2(rank + 1) for rank, rel in enumerate(ideal_order, start=1) if rel > 0)
+    idcg = sum(
+        (2**rel - 1) / math.log2(rank + 1)
+        for rank, rel in enumerate(ideal_order, start=1)
+        if rel > 0
+    )
     if idcg == 0:
         return 0.0
     return dcg / idcg

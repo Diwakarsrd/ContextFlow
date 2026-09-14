@@ -89,9 +89,7 @@ class GraphStore(ABC):
         for entity_id, attributes in entities:
             self.add_entity(entity_id, attributes)
 
-    def add_relationships_batch(
-        self, relationships: list[tuple[str, str, str, float]]
-    ) -> None:
+    def add_relationships_batch(self, relationships: list[tuple[str, str, str, float]]) -> None:
         """Add many relationships at once. Default: loop over
         `add_relationship`. Override for backends where batching reduces
         per-call overhead (see `FileGraphStore` — the same O(n^2)

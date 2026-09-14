@@ -8,9 +8,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-EntityType = Literal[
-    "person", "organization", "project", "document", "ticket", "custom"
-]
+EntityType = Literal["person", "organization", "project", "document", "ticket", "custom"]
 
 
 class Entity(BaseModel):

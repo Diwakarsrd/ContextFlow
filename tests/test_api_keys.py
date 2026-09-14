@@ -25,7 +25,9 @@ def test_create_key_persists_hash_not_plaintext(tmp_path):
 
 def test_from_env_and_file_merges_both_sources(tmp_path, monkeypatch):
     path = tmp_path / "api_keys.json"
-    path.write_text(json.dumps({_hash_key("key-from-file"): {"principal": "bob", "expires_at": None}}))
+    path.write_text(
+        json.dumps({_hash_key("key-from-file"): {"principal": "bob", "expires_at": None}})
+    )
     monkeypatch.setenv("CONTEXTOS_API_KEYS", "key-from-env:carol")
     monkeypatch.chdir(tmp_path)
 

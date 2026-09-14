@@ -16,18 +16,23 @@ import logging
 from starlette.authentication import AuthCredentials, AuthenticationBackend, SimpleUser
 from starlette.requests import HTTPConnection
 
+
 class RequireAuthMiddleware:
     def __init__(self, app, required_scopes=None):
         self.app = app
         self.required_scopes = required_scopes or []
+
     async def __call__(self, scope, receive, send):
         await self.app(scope, receive, send)
+
 
 class BearerAuthBackend(AuthenticationBackend):
     def __init__(self, verifier):
         self.verifier = verifier
+
     async def authenticate(self, conn: HTTPConnection):
         return AuthCredentials(["contextflow"]), SimpleUser("user")
+
 
 from mcp.server.mcpserver import MCPServer
 from starlette.middleware.authentication import AuthenticationMiddleware
@@ -55,7 +60,9 @@ def build_http_app(server: MCPServer, api_key_store: APIKeyStore) -> ASGIApp:
     return RequireAuthMiddleware(authenticated, required_scopes=["contextflow"])
 
 
-def run_http(server: MCPServer, api_key_store: APIKeyStore, host: str = "127.0.0.1", port: int = 8765) -> None:
+def run_http(
+    server: MCPServer, api_key_store: APIKeyStore, host: str = "127.0.0.1", port: int = 8765
+) -> None:
     import uvicorn
 
     app = build_http_app(server, api_key_store)

@@ -94,7 +94,11 @@ class MemoryStore:
             ).fetchall()
         return [
             MemoryEntry(
-                id=r[0], scope=r[1], scope_id=r[2], content=r[3], metadata=json.loads(r[4]),
+                id=r[0],
+                scope=r[1],
+                scope_id=r[2],
+                content=r[3],
+                metadata=json.loads(r[4]),
                 created_at=r[5],
             )
             for r in rows

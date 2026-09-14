@@ -23,7 +23,11 @@ def _sample_conversation() -> dict:
             "session_1": [
                 {"speaker": "Alice", "dia_id": "D1:1", "text": "I went to the dentist yesterday."},
                 {"speaker": "Bob", "dia_id": "D1:2", "text": "Oh how was it?"},
-                {"speaker": "Alice", "dia_id": "D1:3", "text": "It was fine, just a routine cleaning."},
+                {
+                    "speaker": "Alice",
+                    "dia_id": "D1:3",
+                    "text": "It was fine, just a routine cleaning.",
+                },
             ],
         },
         "qa": [

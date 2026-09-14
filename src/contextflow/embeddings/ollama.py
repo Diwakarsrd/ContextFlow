@@ -41,9 +41,7 @@ class OllamaEmbeddingProvider(EmbeddingProvider):
         self._client = httpx.Client(base_url=host, timeout=timeout)
 
     def embed(self, text: str) -> list[float]:
-        resp = self._client.post(
-            "/api/embeddings", json={"model": self.model, "prompt": text}
-        )
+        resp = self._client.post("/api/embeddings", json={"model": self.model, "prompt": text})
         resp.raise_for_status()
         embedding = resp.json()["embedding"]
         if not self.dimensions:

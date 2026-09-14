@@ -30,9 +30,7 @@ class SemanticRetriever:
         their batch APIs, instead of once per object. See
         `core/metadata.py: VectorStore.upsert_batch` for why this
         matters for file-backed stores."""
-        items = [
-            (obj.id, self.embed_fn(obj.content), {"source": obj.source}) for obj in objects
-        ]
+        items = [(obj.id, self.embed_fn(obj.content), {"source": obj.source}) for obj in objects]
         self.vector_store.upsert_batch(items)
         self.metadata_store.put_batch(objects)
 

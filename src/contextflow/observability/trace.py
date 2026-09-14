@@ -36,9 +36,17 @@ class ContextTrace:
     final_tokens: int | None = None
     created_at: float = field(default_factory=time.time)
 
-    def add_stage(self, name: str, count_in: int, count_out: int, duration_ms: float, **details) -> None:
+    def add_stage(
+        self, name: str, count_in: int, count_out: int, duration_ms: float, **details
+    ) -> None:
         self.stages.append(
-            TraceStage(name=name, count_in=count_in, count_out=count_out, duration_ms=duration_ms, details=details)
+            TraceStage(
+                name=name,
+                count_in=count_in,
+                count_out=count_out,
+                duration_ms=duration_ms,
+                details=details,
+            )
         )
 
     def to_dict(self) -> dict:

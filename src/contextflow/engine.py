@@ -193,7 +193,9 @@ class ContextEngine:
         trace_in = ContextTrace(query=query)
         with _Timer() as total:
             results, trace_out = self._retrieve_impl(query, limit, principal, tenant_id, trace_in)
-        assert trace_out is not None  # we passed a real trace in, _retrieve_impl returns it unchanged
+        assert (
+            trace_out is not None
+        )  # we passed a real trace in, _retrieve_impl returns it unchanged
         trace_out.total_duration_ms = total.elapsed_ms
         self.traces.record(trace_out)
         return results, trace_out
@@ -209,7 +211,9 @@ class ContextEngine:
         with _Timer() as t:
             candidates = self._router.route(query, limit=limit * 3)
         if trace is not None:
-            trace.add_stage("route", count_in=0, count_out=len(candidates), duration_ms=t.elapsed_ms)
+            trace.add_stage(
+                "route", count_in=0, count_out=len(candidates), duration_ms=t.elapsed_ms
+            )
 
         if principal is not None:
             count_in = len(candidates)
@@ -217,7 +221,11 @@ class ContextEngine:
                 candidates = filter_visible(candidates, principal, self.policy_engine)
             if trace is not None:
                 trace.add_stage(
-                    "permission_filter", count_in, len(candidates), t.elapsed_ms, principal=principal
+                    "permission_filter",
+                    count_in,
+                    len(candidates),
+                    t.elapsed_ms,
+                    principal=principal,
                 )
 
         if tenant_id is not None:
@@ -253,7 +261,9 @@ class ContextEngine:
         tenant_id: str | None = None,
     ) -> ContextPack:
         objects = self.retrieve(task, limit=limit, principal=principal, tenant_id=tenant_id)
-        return compile_context_pack(task=task, objects=objects, entity=entity, max_tokens=max_tokens)
+        return compile_context_pack(
+            task=task, objects=objects, entity=entity, max_tokens=max_tokens
+        )
 
     def context_pack_with_trace(
         self,
@@ -271,7 +281,9 @@ class ContextEngine:
             task, limit=limit, principal=principal, tenant_id=tenant_id
         )
         with _Timer() as t:
-            pack = compile_context_pack(task=task, objects=objects, entity=entity, max_tokens=max_tokens)
+            pack = compile_context_pack(
+                task=task, objects=objects, entity=entity, max_tokens=max_tokens
+            )
         trace.add_stage("compile", len(objects), 1, t.elapsed_ms, max_tokens=max_tokens)
         trace.total_duration_ms += t.elapsed_ms
         trace.final_confidence = pack.confidence

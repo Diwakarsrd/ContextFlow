@@ -52,8 +52,7 @@ class InMemoryVectorStore(VectorStore):
 
     def search(self, query_embedding: list[float], limit: int = 10) -> list[tuple[str, float]]:
         scored = [
-            (id, cosine_similarity(query_embedding, vec))
-            for id, vec in self._vectors.items()
+            (id, cosine_similarity(query_embedding, vec)) for id, vec in self._vectors.items()
         ]
         scored.sort(key=lambda pair: pair[1], reverse=True)
         return scored[:limit]

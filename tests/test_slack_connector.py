@@ -105,7 +105,9 @@ def test_fetch_includes_thread_replies_but_not_duplicate_parent():
 
 
 def test_fetch_respects_max_messages_per_channel():
-    connector = _connector(channels=["C_PAYMENTS"], max_messages_per_channel=1, include_threads=False)
+    connector = _connector(
+        channels=["C_PAYMENTS"], max_messages_per_channel=1, include_threads=False
+    )
     records = list(connector.fetch("C_PAYMENTS"))
     assert len(records) == 1
 
@@ -134,7 +136,9 @@ def test_full_engine_sync_and_retrieve_end_to_end():
 
     connector = SlackConnector(config={"token": "xoxb-fake", "channels": ["C_PAYMENTS"]})
     connector.authenticate = lambda: setattr(
-        connector, "_client", httpx.Client(base_url="https://slack.com/api", transport=_mock_transport())
+        connector,
+        "_client",
+        httpx.Client(base_url="https://slack.com/api", transport=_mock_transport()),
     )
 
     engine = ContextEngine()

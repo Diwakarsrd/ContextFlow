@@ -226,10 +226,14 @@ if __name__ == "__main__":
     result = run_locomo_eval(args.data_path, engine_factory=engine_factory)
 
     model_suffix = f", model={args.model}" if args.provider == "spacy" else ""
-    print(f"\nLoCoMo retrieval-coverage evaluation ({result.num_conversations} conversations, "
-          f"provider={args.provider}{model_suffix})")
-    print(f"Evaluated: {result.num_questions_evaluated} questions "
-          f"(categories 1/2/4 with real evidence)")
+    print(
+        f"\nLoCoMo retrieval-coverage evaluation ({result.num_conversations} conversations, "
+        f"provider={args.provider}{model_suffix})"
+    )
+    print(
+        f"Evaluated: {result.num_questions_evaluated} questions "
+        f"(categories 1/2/4 with real evidence)"
+    )
     print(f"Excluded: {result.num_questions_excluded} questions (category 3/5, or no evidence)")
     print(f"\n{'Metric':<15}{'Value':>10}")
     print(f"{'Recall@5':<15}{result.recall_at_5:>10.1%}")
@@ -238,6 +242,8 @@ if __name__ == "__main__":
     print(f"{'NDCG@5':<15}{result.ndcg_at_5:>10.3f}")
     print("\nPer category:")
     for cat, stats in sorted(result.per_category.items()):
-        print(f"  {CATEGORY_NAMES[cat]:<12} (n={stats['n']:>4.0f})  "
-              f"R@5={stats['recall_at_5']:.1%}  R@10={stats['recall_at_10']:.1%}  "
-              f"MRR={stats['mrr']:.3f}  NDCG@5={stats['ndcg_at_5']:.3f}")
+        print(
+            f"  {CATEGORY_NAMES[cat]:<12} (n={stats['n']:>4.0f})  "
+            f"R@5={stats['recall_at_5']:.1%}  R@10={stats['recall_at_10']:.1%}  "
+            f"MRR={stats['mrr']:.3f}  NDCG@5={stats['ndcg_at_5']:.3f}"
+        )

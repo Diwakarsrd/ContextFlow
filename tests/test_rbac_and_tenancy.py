@@ -40,7 +40,9 @@ def test_engine_retrieve_uses_policy_engine_for_role_based_access(tmp_path, monk
     engine = ContextEngine(policy_engine=policy)
     engine.ingest(
         [
-            ContextObject(content="quarterly revenue figures", source="t", allowed_roles=["finance"]),
+            ContextObject(
+                content="quarterly revenue figures", source="t", allowed_roles=["finance"]
+            ),
         ]
     )
 
