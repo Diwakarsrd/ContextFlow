@@ -17,8 +17,8 @@ mitigation plan within 14 days for confirmed issues.
 
 | Version | Supported |
 |---------|-----------|
-| 0.1.x   | ✅        |
-| < 0.1   | ❌        |
+| 0.1.x   |         |
+| < 0.1   |         |
 
 ## Scope notes
 

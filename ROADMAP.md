@@ -7,10 +7,10 @@ describe direction, not commitments; they need a real team, real
 infrastructure, and real user feedback to get right, and the further
 down this file you go, the more that's true.
 
-Status legend: ✅ shipped in this scaffold · 🚧 partially built ·
+Status legend:  shipped in this scaffold ·  partially built ·
 ⬜ not started
 
-## Phase 0 — Foundation ✅
+## Phase 0 — Foundation 
 
 Repo hygiene: README, ARCHITECTURE, CONTRIBUTING, SECURITY, CODE_OF_CONDUCT,
 CHANGELOG, LICENSE (Apache 2.0), packaging, CLI skeleton, Docker Compose,
@@ -19,7 +19,7 @@ ruff, mypy, pre-commit config, issue/PR templates, Dependabot.
 
 `git clone ... && docker compose up && contextflow --help` all work.
 
-## Phase 1 — v0.1 local context engine ✅ (core) / 🚧 (connectors)
+## Phase 1 — v0.1 local context engine  (core) /  (connectors)
 
 - [x] `ContextObject`, `ContextPack`, `Entity`, `Relationship`, `Source`
 - [x] Persistent local storage — **the P0 fix**: SQLite metadata store +
@@ -63,7 +63,7 @@ entity-aware retrieval, parent/child retrieval, multi-hop retrieval,
 caching, adaptive top-k, a public benchmark with Recall/Precision/MRR/NDCG
 tracked over time.
 
-## Phase 3 — Real knowledge graph ⬜ (naive version ✅)
+## Phase 3 — Real knowledge graph ⬜ (naive version )
 
 What's shipped: co-mention graph over regex-based proper-noun extraction
 (`graph/entity_extraction.py`) — explicitly a heuristic, not NER — feeding
@@ -73,7 +73,7 @@ What's next: real entity resolution (merge "Acme"/"Acme Corp"/"@acme"),
 model-based entity/relationship extraction, typed relationships beyond
 co-mention, multi-hop graph retrieval as a first-class retrieval strategy.
 
-## Phase 4 — Context compiler maturity 🚧
+## Phase 4 — Context compiler maturity 
 
 What's shipped: token-budgeted compilation, per-item source/confidence/
 freshness provenance, a `ConflictingClaim` schema, and real pipeline
@@ -85,7 +85,7 @@ What's next: real conflict detection (claim extraction + comparison —
 currently a documented no-op stub), compression/summarization beyond
 truncation.
 
-### Tracing / observability ✅
+### Tracing / observability 
 
 `engine.retrieve_with_trace()` / `context_pack_with_trace()` record
 per-stage candidate counts and timing (route → permission filter →
@@ -94,7 +94,7 @@ tenant filter → rerank → limit → compile), exposed via `contextflow trace
 ring buffer per engine instance, not persisted — see
 docs/concepts/tracing.md for what this does and doesn't cover.
 
-## Phase 5 — Memory system 🚧 (v1 shipped, no learning yet)
+## Phase 5 — Memory system  (v1 shipped, no learning yet)
 
 What's shipped: working memory (L1, in-process/ephemeral, by design —
 never persisted) plus session/user/agent/organization memory (L2-L5),
@@ -117,7 +117,7 @@ automatically), **importance scoring**, and **conflict resolution**
 between contradictory facts. These need real usage data to design well —
 v1 recall is keyword relevance + recency, deliberately nothing smarter.
 
-## Phase 6 — Connectors platform 🚧
+## Phase 6 — Connectors platform 
 
 What's shipped:
 
@@ -136,7 +136,7 @@ S3, Snowflake, BigQuery, Databricks, MongoDB — each behind the existing
 `Connector` interface. Goal: most of these come from the community, not
 from a single team building 20 integrations.
 
-## Phase 7 — Governance & security 🚧 (real, not RBAC-complete)
+## Phase 7 — Governance & security  (real, not RBAC-complete)
 
 What's shipped:
 
@@ -181,7 +181,7 @@ Webhooks, CDC, an event bus, incremental indexing, real-time cache
 invalidation. Requires running infrastructure (Kafka or equivalent) that
 doesn't exist yet.
 
-## Phase 9 — ContextBench 🚧 (v0.1 shipped)
+## Phase 9 — ContextBench  (v0.1 shipped)
 
 What's shipped: `benchmarks/datasets/acme_support_v1.yaml` — an 18-query,
 30-document synthetic dataset with deliberate topically-similar
@@ -240,7 +240,7 @@ Treat the engine as a runtime rather than a library: gRPC alongside REST/
 MCP, a Go SDK, formalized plugin loading for retrievers/connectors/
 rerankers/storage backends discovered at runtime rather than imported.
 
-## Phase 13 — Scale 🚧 (measured up to 5,000 objects, not beyond)
+## Phase 13 — Scale  (measured up to 5,000 objects, not beyond)
 
 What's shipped: real performance/scale benchmarking
 (`contextflow benchmark-scale`, `src/contextflow/evaluation/performance.py`)
