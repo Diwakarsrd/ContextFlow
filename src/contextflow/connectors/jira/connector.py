@@ -5,8 +5,8 @@ Extracts Epics, Tasks, and Bugs from Jira workspaces to provide agent metadata.
 """
 
 import logging
-import time
 from collections.abc import Iterable
+from datetime import datetime, timezone
 from typing import Any
 
 import requests
@@ -26,24 +26,22 @@ class JiraConnector(Connector):
         self.email = self.config.get("email")
         self.api_token = self.config.get("api_token")
         self.jql_filter = self.config.get("jql_filter", "ORDER BY updated DESC")
+        self._mock_mode = False
 
     def authenticate(self) -> None:
         if not self.domain or not self.email or not self.api_token:
-            logger.warning(
-                "Jira config missing domain, email, or api_token. Running in mocked demo mode."
-            )
+            logger.warning("Jira config missing domain, email, or api_token. Running in mocked demo mode.")
             self._mock_mode = True
             return
 
         self._mock_mode = False
         url = f"https://{self.domain}/rest/api/3/myself"
-        response = requests.get(url, auth=(self.email, self.api_token))
+        response = requests.get(url, auth=(str(self.email), str(self.api_token)))
         if response.status_code != 200:
             raise ValueError(f"Failed to authenticate with Jira: {response.text}")
 
     def discover(self) -> Iterable[str]:
-        # In this connector, a "resource" is a JQL query execution block
-        yield self.jql_filter
+        yield str(self.jql_filter)
 
     def fetch(self, resource_id: str) -> Iterable[dict[str, Any]]:
         if self._mock_mode:
@@ -60,25 +58,28 @@ class JiraConnector(Connector):
 
         url = f"https://{self.domain}/rest/api/3/search"
         params = {"jql": resource_id, "maxResults": 50}
-        response = requests.get(url, auth=(self.email, self.api_token), params=params)
+        response = requests.get(url, auth=(str(self.email), str(self.api_token)), params=params)
         response.raise_for_status()
 
         data = response.json()
         yield from data.get("issues", [])
 
     def normalize(self, raw_record: dict[str, Any]) -> ContextObject:
-        key = raw_record.get("key", "UNKNOWN")
+        key = str(raw_record.get("key", "UNKNOWN"))
         fields = raw_record.get("fields", {})
         summary = fields.get("summary", "")
         desc = fields.get("description", "")
         assignee = fields.get("assignee", {}).get("displayName", "Unassigned")
-        updated = fields.get("updated", "")
+        updated = str(fields.get("updated", ""))
 
-        # Combine into a dense string for vector embedding
         text_payload = f"Jira Ticket {key}: {summary}. Assigned to {assignee}. Description: {desc}"
 
-        # Assign contextual significance (trust/confidence)
         confidence = 0.9 if assignee != "Unassigned" else 0.5
+
+        try:
+            dt_created = datetime.fromisoformat(updated.replace("Z", "+00:00").replace("+0000", "+00:00"))
+        except (ValueError, TypeError):
+            dt_created = datetime.now(timezone.utc)
 
         return ContextObject(
             id=f"jira_{key}",
@@ -91,5 +92,5 @@ class JiraConnector(Connector):
                 "last_updated": updated,
             },
             confidence=confidence,
-            timestamp=time.time(),
+            created_at=dt_created,
         )

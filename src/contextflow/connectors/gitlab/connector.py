@@ -5,8 +5,8 @@ Extracts repositories, issues, and merge requests.
 """
 
 import logging
-import time
 from collections.abc import Iterable
+from datetime import datetime, timezone
 from typing import Any
 
 import requests
@@ -29,17 +29,13 @@ class GitLabConnector(Connector):
 
     def authenticate(self) -> None:
         if not self.private_token or not self.project_id:
-            logger.warning(
-                "GitLab config missing private_token or project_id. Running in mocked mode."
-            )
+            logger.warning("GitLab config missing private_token or project_id. Running in mocked mode.")
             self._mock_mode = True
             return
 
-        headers = {"PRIVATE-TOKEN": self.private_token}
+        headers = {"PRIVATE-TOKEN": str(self.private_token)}
         response = requests.get(f"{self.api_url}/user", headers=headers)
         if response.status_code not in (200, 401):
-            # 401 allowed if token is project-specific rather than user-level,
-            # though standard implementation validates proper access handling.
             pass
 
     def discover(self) -> Iterable[str]:
@@ -58,7 +54,7 @@ class GitLabConnector(Connector):
             }
             return
 
-        headers = {"PRIVATE-TOKEN": self.private_token}
+        headers = {"PRIVATE-TOKEN": str(self.private_token)}
         url = f"{self.api_url}/projects/{self.project_id}/{resource_id}"
 
         response = requests.get(url, headers=headers)
@@ -71,10 +67,17 @@ class GitLabConnector(Connector):
         item_id = str(raw_record.get("id", "UNKNOWN"))
         title = raw_record.get("title", "")
         desc = raw_record.get("description", "")
-        item_type = raw_record.get("type", "entity")
+        item_type = str(raw_record.get("type", "entity"))
         state = raw_record.get("state", "unknown")
+        
+        updated_at_str = str(raw_record.get("updated_at", ""))
 
         text_payload = f"GitLab {item_type} #{item_id}: {title}. State: {state}. Details: {desc}"
+
+        try:
+            dt_created = datetime.fromisoformat(updated_at_str.replace("Z", "+00:00"))
+        except (ValueError, TypeError):
+            dt_created = datetime.now(timezone.utc)
 
         return ContextObject(
             id=f"gitlab_{item_type}_{item_id}",
@@ -82,5 +85,5 @@ class GitLabConnector(Connector):
             source="gitlab",
             metadata={"source": "gitlab", "type": item_type, "state": state},
             confidence=0.9,
-            timestamp=time.time(),
+            created_at=dt_created,
         )

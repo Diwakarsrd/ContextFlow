@@ -5,8 +5,8 @@ Extracts server messages and threads to provide conversational context.
 """
 
 import logging
-import time
 from collections.abc import Iterable
+from datetime import datetime, timezone
 from typing import Any
 
 import requests
@@ -61,12 +61,17 @@ class DiscordConnector(Connector):
         yield from response.json()
 
     def normalize(self, raw_record: dict[str, Any]) -> ContextObject:
-        msg_id = raw_record.get("id", "UNKNOWN")
+        msg_id = str(raw_record.get("id", "UNKNOWN"))
         content = raw_record.get("content", "")
         author = raw_record.get("author", {}).get("username", "UnknownUser")
-        timestamp_str = raw_record.get("timestamp", "")
+        timestamp_str = str(raw_record.get("timestamp", ""))
 
         text_payload = f"Discord Message from {author}: {content}"
+
+        try:
+            dt_created = datetime.fromisoformat(timestamp_str.replace("Z", "+00:00"))
+        except (ValueError, TypeError):
+            dt_created = datetime.now(timezone.utc)
 
         return ContextObject(
             id=f"discord_{msg_id}",
@@ -74,5 +79,5 @@ class DiscordConnector(Connector):
             source="discord",
             metadata={"source": "discord", "author": author, "recorded_at": timestamp_str},
             confidence=0.8,
-            timestamp=time.time(),
+            created_at=dt_created,
         )
