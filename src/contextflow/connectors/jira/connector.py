@@ -30,7 +30,9 @@ class JiraConnector(Connector):
 
     def authenticate(self) -> None:
         if not self.domain or not self.email or not self.api_token:
-            logger.warning("Jira config missing domain, email, or api_token. Running in mocked demo mode.")
+            logger.warning(
+                "Jira config missing domain, email, or api_token. Running in mocked demo mode."
+            )
             self._mock_mode = True
             return
 
@@ -77,7 +79,9 @@ class JiraConnector(Connector):
         confidence = 0.9 if assignee != "Unassigned" else 0.5
 
         try:
-            dt_created = datetime.fromisoformat(updated.replace("Z", "+00:00").replace("+0000", "+00:00"))
+            dt_created = datetime.fromisoformat(
+                updated.replace("Z", "+00:00").replace("+0000", "+00:00")
+            )
         except (ValueError, TypeError):
             dt_created = datetime.now(timezone.utc)
 

@@ -1,3 +1,5 @@
+from contextflow.core.context import ContextObject
+from contextflow.ingestion.pipeline import process
 from contextflow.governance.pii import contains_pii, find_pii, redact_pii
 
 
@@ -30,3 +32,16 @@ def test_redact_replaces_matches():
     redacted = redact_pii("Email me: alice@example.com please")
     assert "alice@example.com" not in redacted
     assert "[REDACTED:EMAIL]" in redacted
+
+
+
+
+def test_ingestion_pipeline_auto_redacts():
+    obj = ContextObject(content="Call me at 555-123-4567 or email bob@acme.com", source="custom")
+    processed = process([obj])
+    assert len(processed) >= 1
+    chunk = processed[0].content
+    assert "bob@acme.com" not in chunk
+    assert "555-123-4567" not in chunk
+    assert "[REDACTED:EMAIL]" in chunk
+    assert "[REDACTED:PHONE]" in chunk

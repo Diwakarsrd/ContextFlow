@@ -29,7 +29,9 @@ class GitLabConnector(Connector):
 
     def authenticate(self) -> None:
         if not self.private_token or not self.project_id:
-            logger.warning("GitLab config missing private_token or project_id. Running in mocked mode.")
+            logger.warning(
+                "GitLab config missing private_token or project_id. Running in mocked mode."
+            )
             self._mock_mode = True
             return
 
@@ -69,7 +71,7 @@ class GitLabConnector(Connector):
         desc = raw_record.get("description", "")
         item_type = str(raw_record.get("type", "entity"))
         state = raw_record.get("state", "unknown")
-        
+
         updated_at_str = str(raw_record.get("updated_at", ""))
 
         text_payload = f"GitLab {item_type} #{item_id}: {title}. State: {state}. Details: {desc}"
