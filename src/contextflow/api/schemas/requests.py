@@ -34,3 +34,13 @@ class MemoryRecallRequest(BaseModel):
     scope_id: str
     query: str | None = None
     limit: int = 10
+
+
+class AssignRoleRequest(BaseModel):
+    principal: str
+    role: str
+
+
+class RevokeRoleRequest(BaseModel):
+    principal: str
+    role: str

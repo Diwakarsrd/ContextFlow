@@ -20,6 +20,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 
 from contextflow.api.routes import context as context_routes
+from contextflow.api.routes import governance as governance_routes
 from contextflow.api.routes import memory as memory_routes
 from contextflow.api.routes import trace as trace_routes
 from contextflow.auth.api_keys import APIKeyStore
@@ -52,6 +53,7 @@ def create_app(
     app.include_router(context_routes.router, prefix="/v1", tags=["context"])
     app.include_router(trace_routes.router, prefix="/v1", tags=["trace"])
     app.include_router(memory_routes.router, prefix="/v1", tags=["memory"])
+    app.include_router(governance_routes.router, prefix="/v1/governance", tags=["governance"])
 
     @app.get("/health")
     def health() -> dict:

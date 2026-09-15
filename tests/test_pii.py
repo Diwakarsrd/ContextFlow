@@ -34,8 +34,6 @@ def test_redact_replaces_matches():
     assert "[REDACTED:EMAIL]" in redacted
 
 
-
-
 def test_ingestion_pipeline_auto_redacts():
     obj = ContextObject(content="Call me at 555-123-4567 or email bob@acme.com", source="custom")
     processed = process([obj])
