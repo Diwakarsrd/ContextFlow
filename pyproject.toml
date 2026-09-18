@@ -38,7 +38,7 @@ neo4j = ["neo4j>=5.19"]
 openai = ["openai>=1.30"]
 spacy = ["spacy>=3.7"]  # also needs: python -m spacy download en_core_web_md
 dev = [
-    "pytest>=8.0",
+    "pytest>=9.1.1",
     "pytest-asyncio>=0.23",
     "ruff>=0.4",
     "mypy>=1.10",
