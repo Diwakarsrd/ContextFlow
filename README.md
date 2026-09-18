@@ -5,6 +5,8 @@
 <p align="center">
   <img src="https://img.shields.io/badge/build-passing-brightgreen" alt="Build Status">
   <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10+">
+  <a href="https://pypi.org/project/contextflow-engine/"><img src="https://img.shields.io/pypi/v/contextflow-engine?color=blue" alt="PyPI version"></a>
+
   <img src="https://img.shields.io/badge/MCP-native-orange" alt="MCP Native">
   <img src="https://img.shields.io/badge/license-Apache%202.0-lightgrey" alt="License">
 </p>
@@ -16,6 +18,17 @@ LLM, agent framework, or data stack you use.
 [Quick Start](#quick-start) · [Docs](docs/getting_started.md) · [Architecture](ARCHITECTURE.md) · [Contributing](CONTRIBUTING.md)
 
 ---
+
+
+## Quick Start
+
+### Installation
+ContextFlow is actively published to PyPI for enterprise deployment.
+`ash
+pip install contextflow-engine
+`
+
+
 
 ## Why ContextFlow
 
@@ -183,7 +196,238 @@ Don't want the knowledge graph? Don't install it. Every subsystem is an
 interface with swappable backends:
 
 | Layer     | Interface        | Built-in backends                  |
-|-----------|-------------------|-------------------------------------|
+|---
+
+
+## Quick Start
+
+### Installation
+ContextFlow is actively published to PyPI for enterprise deployment.
+`ash
+pip install contextflow-engine
+`
+
+---
+
+
+## Quick Start
+
+### Installation
+ContextFlow is actively published to PyPI for enterprise deployment.
+`ash
+pip install contextflow-engine
+`
+
+---
+
+
+## Quick Start
+
+### Installation
+ContextFlow is actively published to PyPI for enterprise deployment.
+`ash
+pip install contextflow-engine
+`
+
+--|---
+
+
+## Quick Start
+
+### Installation
+ContextFlow is actively published to PyPI for enterprise deployment.
+`ash
+pip install contextflow-engine
+`
+
+---
+
+
+## Quick Start
+
+### Installation
+ContextFlow is actively published to PyPI for enterprise deployment.
+`ash
+pip install contextflow-engine
+`
+
+---
+
+
+## Quick Start
+
+### Installation
+ContextFlow is actively published to PyPI for enterprise deployment.
+`ash
+pip install contextflow-engine
+`
+
+---
+
+
+## Quick Start
+
+### Installation
+ContextFlow is actively published to PyPI for enterprise deployment.
+`ash
+pip install contextflow-engine
+`
+
+---
+
+
+## Quick Start
+
+### Installation
+ContextFlow is actively published to PyPI for enterprise deployment.
+`ash
+pip install contextflow-engine
+`
+
+---
+
+
+## Quick Start
+
+### Installation
+ContextFlow is actively published to PyPI for enterprise deployment.
+`ash
+pip install contextflow-engine
+`
+
+-|---
+
+
+## Quick Start
+
+### Installation
+ContextFlow is actively published to PyPI for enterprise deployment.
+`ash
+pip install contextflow-engine
+`
+
+---
+
+
+## Quick Start
+
+### Installation
+ContextFlow is actively published to PyPI for enterprise deployment.
+`ash
+pip install contextflow-engine
+`
+
+---
+
+
+## Quick Start
+
+### Installation
+ContextFlow is actively published to PyPI for enterprise deployment.
+`ash
+pip install contextflow-engine
+`
+
+---
+
+
+## Quick Start
+
+### Installation
+ContextFlow is actively published to PyPI for enterprise deployment.
+`ash
+pip install contextflow-engine
+`
+
+---
+
+
+## Quick Start
+
+### Installation
+ContextFlow is actively published to PyPI for enterprise deployment.
+`ash
+pip install contextflow-engine
+`
+
+---
+
+
+## Quick Start
+
+### Installation
+ContextFlow is actively published to PyPI for enterprise deployment.
+`ash
+pip install contextflow-engine
+`
+
+---
+
+
+## Quick Start
+
+### Installation
+ContextFlow is actively published to PyPI for enterprise deployment.
+`ash
+pip install contextflow-engine
+`
+
+---
+
+
+## Quick Start
+
+### Installation
+ContextFlow is actively published to PyPI for enterprise deployment.
+`ash
+pip install contextflow-engine
+`
+
+---
+
+
+## Quick Start
+
+### Installation
+ContextFlow is actively published to PyPI for enterprise deployment.
+`ash
+pip install contextflow-engine
+`
+
+---
+
+
+## Quick Start
+
+### Installation
+ContextFlow is actively published to PyPI for enterprise deployment.
+`ash
+pip install contextflow-engine
+`
+
+---
+
+
+## Quick Start
+
+### Installation
+ContextFlow is actively published to PyPI for enterprise deployment.
+`ash
+pip install contextflow-engine
+`
+
+---
+
+
+## Quick Start
+
+### Installation
+ContextFlow is actively published to PyPI for enterprise deployment.
+`ash
+pip install contextflow-engine
+`
+
+-|
 | Vector    | `VectorStore`     | pgvector, Qdrant                    |
 | Graph     | `GraphStore`      | Neo4j (optional)                    |
 | Metadata  | `MetadataStore`   | SQLite, PostgreSQL                  |
