@@ -44,3 +44,9 @@ class AssignRoleRequest(BaseModel):
 class RevokeRoleRequest(BaseModel):
     principal: str
     role: str
+
+class WebhookPayloadRequest(BaseModel):
+    source: str
+    content: str
+    metadata: dict | None = None
+    tenant_id: str | None = None
