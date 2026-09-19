@@ -21,5 +21,18 @@ class AgentMemory:
     def recall(self, query: str | None = None, limit: int = 10) -> list[MemoryEntry]:
         return self.store.recall("agent", self.agent_id, query, limit)
 
+
+    def recall_shared(self, query: str | None = None, limit: int = 10) -> list[MemoryEntry]:
+        """Recall globally shared agent context (namespace 'shared')."""
+        return self.store.recall("agent", "shared", query, limit)
+        
+    def handoff_to(self, target_agent_id: str, entry_id: str) -> str:
+        """Explicitly push a memory context block to another agent's private namespace."""
+        return self.store.share_memory(entry_id, "agent", target_agent_id)
+        
+    def publish_shared(self, entry_id: str) -> str:
+        """Promote a private memory to the global agent shared namespace."""
+        return self.store.share_memory(entry_id, "agent", "shared")
+
     def forget(self, entry_id: str) -> bool:
         return self.store.forget(entry_id)

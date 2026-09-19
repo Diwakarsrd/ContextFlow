@@ -79,6 +79,25 @@ class MemoryStore:
             self._conn.commit()
         return entry_id
 
+
+    def share_memory(self, entry_id: str, new_scope: str, new_scope_id: str) -> str:
+        """Phase 11: Cross-namespace memory handoff (e.g. Agent A hands context to Agent B).
+        Creates a distinct reference to the original fact under the new namespace."""
+        with self._lock:
+            
+                row = self._conn.execute(
+                    "SELECT content, metadata FROM memory WHERE id = ?",
+                    (entry_id,)
+                ).fetchone()
+                if not row:
+                    raise ValueError(f"Memory {entry_id} not found for handoff.")
+                
+                content, meta_str = row
+                metadata = json.loads(meta_str) if meta_str else {}
+                metadata["_handoff_source"] = entry_id  # Track lineage
+                
+        return self.remember(new_scope, new_scope_id, content, metadata=metadata)
+
     def forget(self, entry_id: str) -> bool:
         with self._lock:
             cur = self._conn.execute("DELETE FROM memory WHERE id = ?", (entry_id,))
