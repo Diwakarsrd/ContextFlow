@@ -11,6 +11,15 @@ contextflow evaluate --benchmark benchmarks/datasets/acme_support_v1.yaml --outp
 contextflow evaluate --benchmark benchmarks/datasets/acme_support_v1.yaml --compare-to baseline.json
 ```
 
+## External benchmarks
+
+- [`external/multihop_rag/`](external/multihop_rag/RESULTS.md) — multi-document
+  retrieval over 609 news articles (MultiHop-RAG, COLING 2024). The main
+  context-engine benchmark: ContextFlow vs. naive vector RAG, and
+  Context Pack vs. top-k at a fixed token budget.
+- [`external/locomo/`](external/locomo/RESULTS.md) — conversational memory
+  (LoCoMo, ACL 2024).
+
 ## Datasets
 
 ### `acme_support_v1` (18 queries, 30 documents)
