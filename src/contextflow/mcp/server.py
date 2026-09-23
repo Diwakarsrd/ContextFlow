@@ -85,7 +85,7 @@ def build_server(
     @server.tool()
     def explain_context(context_object_id: str) -> dict:
         """Explain why a given context object was retrieved/ranked: the
-        raw retrieval score (semantic or keyword, whichever produced it),
+        fused retrieval score it got in the most recent query,
         the freshness/confidence/trust signals, the reranker's weights,
         and the resulting final score — the actual formula
         QualityWeightedReranker used, not just the raw fields."""
@@ -93,9 +93,9 @@ def build_server(
         if obj is None:
             return {"error": "not found"}
 
-        base_score = (
-            obj.metadata.get("_semantic_score") or obj.metadata.get("_keyword_score") or 0.0
-        )
+        # Scores live on per-query copies, not the stored object; the
+        # hybrid retriever keeps the most recent query's scores.
+        base_score = engine._hybrid.last_scores.get(context_object_id, 0.0)
         reranker = engine.reranker
         freshness_weight = getattr(reranker, "freshness_weight", None)
         confidence_weight = getattr(reranker, "confidence_weight", None)

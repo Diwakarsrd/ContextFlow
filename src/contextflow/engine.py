@@ -108,8 +108,12 @@ class ContextEngine:
         if embedding_provider is not None and embed_fn is not None:
             raise ValueError("Pass either embedding_provider or embed_fn, not both")
         self.embed_fn: Callable[[str], list[float]]
+        embed_batch_fn: Callable[[list[str]], list[list[float]]] | None = None
+        embed_query_fn: Callable[[str], list[float]] | None = None
         if embedding_provider is not None:
             self.embed_fn = embedding_provider.embed
+            embed_batch_fn = embedding_provider.embed_batch
+            embed_query_fn = embedding_provider.embed_query
         elif embed_fn is not None:
             self.embed_fn = embed_fn
         else:
@@ -123,7 +127,9 @@ class ContextEngine:
         self.reranker = reranker or QualityWeightedReranker()
         self.connectors = connectors or []
 
-        self._semantic = SemanticRetriever(self.vector_store, self.metadata_store, self.embed_fn)
+        self._semantic = SemanticRetriever(
+            self.vector_store, self.metadata_store, self.embed_fn, embed_batch_fn, embed_query_fn
+        )
         self._keyword = KeywordRetriever()
         self._hybrid = HybridRetriever(self._semantic, self._keyword)
         self._router = RetrievalRouter(self._hybrid)

@@ -1,8 +1,12 @@
+from collections.abc import Iterable
+from typing import Any
+
 import pytest
-from contextflow.plugins import PluginRegistry
+
 from contextflow.connectors.base import Connector
 from contextflow.core.context import ContextObject
-from typing import Iterable, Any
+from contextflow.plugins import PluginRegistry
+
 
 class MockProprietaryConnector(Connector):
     def authenticate(self) -> None: pass

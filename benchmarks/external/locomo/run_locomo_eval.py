@@ -35,8 +35,10 @@ script does not attempt that.
 ## Scope: which questions are evaluated
 
 LoCoMo's `qa` entries have five categories:
-  1 = single-hop, 2 = temporal reasoning, 3 = commonsense/open-ended,
-  4 = multi-hop, 5 = adversarial (no real answer exists).
+  1 = multi-hop, 2 = temporal reasoning, 3 = commonsense/open-ended,
+  4 = single-hop, 5 = adversarial (no real answer exists). Verified from
+  the data: 98% of category-1 questions cite 2+ evidence turns vs. 5% of
+  category 4, so category 1 is multi-hop and 4 is single-hop.
 
 Only categories 1, 2, and 4 have a non-empty `evidence` list pointing
 to real dialogue turn IDs — those are the only ones "did retrieval find
@@ -71,7 +73,7 @@ from contextflow.evaluation.retrieval import mean_reciprocal_rank, ndcg_at_k, re
 
 LOCOMO_URL = "https://raw.githubusercontent.com/snap-research/locomo/main/data/locomo10.json"
 EVALUABLE_CATEGORIES = {1, 2, 4}  # see module docstring for why 3 and 5 are excluded
-CATEGORY_NAMES = {1: "single-hop", 2: "temporal", 4: "multi-hop"}
+CATEGORY_NAMES = {1: "multi-hop", 2: "temporal", 4: "single-hop"}
 
 
 @dataclass
@@ -199,18 +201,19 @@ if __name__ == "__main__":
     parser.add_argument("data_path", nargs="?", default="/tmp/locomo10.json")
     parser.add_argument(
         "--provider",
-        choices=["hash", "spacy"],
+        choices=["hash", "spacy", "ollama"],
         default="hash",
-        help="Embedding provider: 'hash' (zero-config placeholder, default) or "
+        help="Embedding provider: 'hash' (zero-config placeholder, default), "
         "'spacy' (real local semantic embeddings, requires: pip install spacy && "
-        "python -m spacy download <model>)",
+        "python -m spacy download <model>), or 'ollama' (trained sentence encoder "
+        "served by a local Ollama, requires: ollama pull <model>)",
     )
     parser.add_argument(
         "--model",
-        default="en_core_web_md",
-        help="spaCy model to use with --provider spacy (default: en_core_web_md). "
-        "en_core_web_lg scores substantially higher in testing (see RESULTS.md) "
-        "at the cost of a ~400MB download: python -m spacy download en_core_web_lg",
+        default=None,
+        help="Model for --provider spacy (default: en_core_web_md; en_core_web_lg "
+        "scores substantially higher, see RESULTS.md) or --provider ollama "
+        "(default: nomic-embed-text).",
     )
     args = parser.parse_args()
 
@@ -220,12 +223,19 @@ if __name__ == "__main__":
     if args.provider == "spacy":
         from contextflow.embeddings.spacy_local import SpacyEmbeddingProvider
 
+        args.model = args.model or "en_core_web_md"
         provider = SpacyEmbeddingProvider(model=args.model)
+        engine_factory = lambda: ContextEngine(embedding_provider=provider)
+    elif args.provider == "ollama":
+        from contextflow.embeddings.ollama import OllamaEmbeddingProvider
+
+        args.model = args.model or "nomic-embed-text"
+        provider = OllamaEmbeddingProvider(model=args.model)
         engine_factory = lambda: ContextEngine(embedding_provider=provider)
 
     result = run_locomo_eval(args.data_path, engine_factory=engine_factory)
 
-    model_suffix = f", model={args.model}" if args.provider == "spacy" else ""
+    model_suffix = f", model={args.model}" if args.model else ""
     print(
         f"\nLoCoMo retrieval-coverage evaluation ({result.num_conversations} conversations, "
         f"provider={args.provider}{model_suffix})"

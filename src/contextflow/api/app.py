@@ -21,9 +21,9 @@ from fastapi import FastAPI
 
 from contextflow.api.routes import context as context_routes
 from contextflow.api.routes import governance as governance_routes
-from contextflow.api.routes import webhooks as webhook_routes
 from contextflow.api.routes import memory as memory_routes
 from contextflow.api.routes import trace as trace_routes
+from contextflow.api.routes import webhooks as webhook_routes
 from contextflow.auth.api_keys import APIKeyStore
 from contextflow.auth.rate_limit import RateLimiter
 from contextflow.engine import ContextEngine

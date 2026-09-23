@@ -2,8 +2,9 @@ import pytest
 from fastapi.testclient import TestClient
 
 from contextflow.api.app import app
-from contextflow.governance.policies import PolicyEngine
 from contextflow.auth.api_keys import APIKeyStore
+from contextflow.governance.policies import PolicyEngine
+
 
 @pytest.fixture
 def client():

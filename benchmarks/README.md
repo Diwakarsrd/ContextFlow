@@ -11,6 +11,15 @@ contextflow evaluate --benchmark benchmarks/datasets/acme_support_v1.yaml --outp
 contextflow evaluate --benchmark benchmarks/datasets/acme_support_v1.yaml --compare-to baseline.json
 ```
 
+## External benchmarks
+
+- [`external/multihop_rag/`](external/multihop_rag/RESULTS.md) — multi-document
+  retrieval over 609 news articles (MultiHop-RAG, COLING 2024). The main
+  context-engine benchmark: ContextFlow vs. naive vector RAG, and
+  Context Pack vs. top-k at a fixed token budget.
+- [`external/locomo/`](external/locomo/RESULTS.md) — conversational memory
+  (LoCoMo, ACL 2024).
+
 ## Datasets
 
 ### `acme_support_v1` (18 queries, 30 documents)
@@ -41,10 +50,25 @@ under BM25 alone, which would test nothing.
 **Evidence this actually has meaningful difficulty**: running it against
 the default `LocalHashEmbeddingProvider` (see docs/concepts/embeddings.md
 — a placeholder with no real semantic understanding) produces
-Recall@5 ≈ 61%, not 100% or 0%. Real embedding providers should score
+Recall@5 ≈ 92% (61% before the BM25 tokenizer fix), not 100% or 0%. A real embedding provider does score
 meaningfully higher; if a future change to retrieval logic doesn't move
 these numbers when it should, or moves them when it shouldn't, that's a
 signal to look closer.
+
+| Provider | Recall@5 | Precision@5 | MRR | NDCG@5 |
+|---|---|---|---|---|
+| hash placeholder (default) | 91.7% | 21.1% | 0.810 | 0.826 |
+| Ollama `nomic-embed-text` | 100.0% | 23.3% | 1.000 | 0.993 |
+
+(Before the retrieval fixes in the same release: hash 61.1% / MRR 0.375,
+Ollama 100.0% / MRR 0.963.)
+
+Reproduce the second row with
+`CONTEXTOS_EMBEDDING_PROVIDER=ollama contextflow evaluate`. Precision@5
+is capped near 20-25% because most queries have only one relevant
+document. With a real encoder this 18-query set is saturated, so it is
+now a regression check rather than a discriminating benchmark; use
+LoCoMo (`benchmarks/external/locomo/`) to compare retrieval changes.
 
 One query (`GDPR data deletion`) uses **graded relevance** to
 demonstrate the NDCG metric distinguishing a directly-responsive

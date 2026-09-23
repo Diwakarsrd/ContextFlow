@@ -1,6 +1,6 @@
-﻿import os
-from contextflow import ContextEngine
+﻿from contextflow import ContextEngine
 from contextflow.core.context import ContextObject
+
 
 def showcase_langchain_memory_integration():
     print("--- ContextOS + LangChain Enterprise Integration ---")

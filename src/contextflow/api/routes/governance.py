@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Request, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from contextflow.api.schemas.requests import AssignRoleRequest, RevokeRoleRequest
 from contextflow.auth.fastapi_deps import require_principal

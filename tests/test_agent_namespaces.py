@@ -1,5 +1,6 @@
-from contextflow.memory.store import MemoryStore
 from contextflow.memory.agent import AgentMemory
+from contextflow.memory.store import MemoryStore
+
 
 def test_phase11_agent_handoff_and_namespaces(tmp_path):
     store = MemoryStore(path=str(tmp_path / "memory.db"))

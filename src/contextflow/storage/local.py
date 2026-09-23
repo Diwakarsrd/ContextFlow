@@ -11,6 +11,8 @@ from __future__ import annotations
 import math
 from typing import Any
 
+import numpy as np
+
 from contextflow.core.context import ContextObject
 from contextflow.core.metadata import GraphStore, MetadataStore, VectorStore
 
@@ -38,24 +40,73 @@ class InMemoryMetadataStore(MetadataStore):
         return list(self._objects.values())
 
 
+class CosineIndex:
+    """Brute-force cosine top-k over an `{id: vector}` dict, vectorized
+    with numpy: the vectors are normalized into one matrix (rebuilt
+    lazily after `invalidate()`), so a search is a single matrix-vector
+    product instead of a Python loop over every vector (measured at 7,259
+    768-d vectors: 3.3 s -> 3.5 ms per search). Falls back to the pure-Python loop if vectors
+    have mixed dimensions."""
+
+    def __init__(self) -> None:
+        self._ids: list[str] = []
+        self._matrix: np.ndarray | None = None
+        self._dirty = True
+
+    def invalidate(self) -> None:
+        self._dirty = True
+
+    def search(
+        self, vectors: dict[str, list[float]], query: list[float], limit: int
+    ) -> list[tuple[str, float]]:
+        if not vectors or limit <= 0:
+            return []
+        if self._dirty:
+            self._ids = list(vectors)
+            try:
+                matrix = np.asarray([vectors[i] for i in self._ids], dtype=np.float32)
+            except ValueError:  # ragged: vectors of different dimensions
+                matrix = None
+            if matrix is not None and matrix.ndim == 2:
+                norms = np.linalg.norm(matrix, axis=1, keepdims=True)
+                self._matrix = np.divide(
+                    matrix, norms, out=np.zeros_like(matrix), where=norms > 0
+                )
+            else:
+                self._matrix = None
+            self._dirty = False
+
+        q = np.asarray(query, dtype=np.float32)
+        q_norm = float(np.linalg.norm(q)) if q.ndim == 1 else 0.0
+        if self._matrix is None or q.shape != (self._matrix.shape[1],) or q_norm == 0:
+            scored = [(id, cosine_similarity(query, vec)) for id, vec in vectors.items()]
+            scored.sort(key=lambda pair: pair[1], reverse=True)
+            return scored[:limit]
+
+        sims = self._matrix @ (q / q_norm)
+        k = min(limit, len(self._ids))
+        top = np.argpartition(-sims, k - 1)[:k]
+        top = top[np.argsort(-sims[top], kind="stable")]
+        return [(self._ids[i], float(sims[i])) for i in top]
+
+
 class InMemoryVectorStore(VectorStore):
-    """Brute-force cosine similarity. Fine up to a few thousand vectors —
-    swap in Qdrant or pgvector well before that point."""
+    """Brute-force cosine similarity (numpy-vectorized, see CosineIndex).
+    Fine up to tens of thousands of vectors — swap in Qdrant or pgvector
+    beyond that."""
 
     def __init__(self) -> None:
         self._vectors: dict[str, list[float]] = {}
         self._payloads: dict[str, dict[str, Any]] = {}
+        self._index = CosineIndex()
 
     def upsert(self, id: str, embedding: list[float], payload: dict[str, Any]) -> None:
         self._vectors[id] = embedding
         self._payloads[id] = payload
+        self._index.invalidate()
 
     def search(self, query_embedding: list[float], limit: int = 10) -> list[tuple[str, float]]:
-        scored = [
-            (id, cosine_similarity(query_embedding, vec)) for id, vec in self._vectors.items()
-        ]
-        scored.sort(key=lambda pair: pair[1], reverse=True)
-        return scored[:limit]
+        return self._index.search(self._vectors, query_embedding, limit)
 
 
 class InMemoryGraphStore(GraphStore):
