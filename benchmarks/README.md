@@ -41,10 +41,22 @@ under BM25 alone, which would test nothing.
 **Evidence this actually has meaningful difficulty**: running it against
 the default `LocalHashEmbeddingProvider` (see docs/concepts/embeddings.md
 — a placeholder with no real semantic understanding) produces
-Recall@5 ≈ 61%, not 100% or 0%. Real embedding providers should score
+Recall@5 ≈ 61%, not 100% or 0%. A real embedding provider does score
 meaningfully higher; if a future change to retrieval logic doesn't move
 these numbers when it should, or moves them when it shouldn't, that's a
 signal to look closer.
+
+| Provider | Recall@5 | Precision@5 | MRR | NDCG@5 |
+|---|---|---|---|---|
+| hash placeholder (default) | 61.1% | 13.3% | 0.375 | 0.399 |
+| Ollama `nomic-embed-text` | 100.0% | 23.3% | 0.963 | 0.968 |
+
+Reproduce the second row with
+`CONTEXTOS_EMBEDDING_PROVIDER=ollama contextflow evaluate`. Precision@5
+is capped near 20-25% because most queries have only one relevant
+document. With a real encoder this 18-query set is saturated, so it is
+now a regression check rather than a discriminating benchmark; use
+LoCoMo (`benchmarks/external/locomo/`) to compare retrieval changes.
 
 One query (`GDPR data deletion`) uses **graded relevance** to
 demonstrate the NDCG metric distinguishing a directly-responsive

@@ -13,28 +13,43 @@ before you do anything with the downloaded data beyond local evaluation).
 
 ## Results (run against this codebase, this session)
 
-Three configurations, same code, same dataset, same 1,444 evaluable
+Four configurations, same code, same dataset, same 1,444 evaluable
 questions:
 
 ```
-                     hash        spacy (md)      spacy (lg)      published
-                   (default)   (local, small)  (local, bigger)   comparable
-Recall@5              8.5%         15.8%           27.3%           93.9%
-Recall@10            14.5%         25.7%           40.7%             --
-MRR                  0.059         0.105           0.168             --
-NDCG@5                0.055        0.102           0.173             --
+                  hash       spacy (md)    spacy (lg)    ollama          published
+                (default)     (local)       (local)     nomic-embed-text comparable
+Recall@5          8.5%        15.8%         27.3%          44.5%           93.9%
+Recall@10        14.5%        25.7%         40.7%          61.0%             --
+MRR              0.059        0.105         0.168          0.284             --
+NDCG@5           0.055        0.102         0.173          0.298             --
 
 Per category (Recall@5):
-  single-hop     4.4%    4.8%    6.9%
-  temporal       6.8%   15.4%   32.5%
-  multi-hop     10.5%   19.7%   32.2%
+  single-hop (n=841)   10.5%   19.7%   32.2%   54.4%
+  temporal   (n=321)    6.8%   15.4%   32.5%   43.3%
+  multi-hop  (n=282)    4.4%    4.8%    6.9%   16.3%
 ```
 
-Reproduce: `--provider hash` / `--provider spacy` (`en_core_web_lg` was
-tested via a scratch script, not yet a checked-in CLI flag — see "What's
-next" below, stated as a real gap, not hidden).
+Reproduce: `--provider hash` / `--provider spacy [--model en_core_web_lg]`
+/ `--provider ollama` (after `ollama pull nomic-embed-text`). The Ollama
+run took 11.5 minutes end to end on a CPU-only 8 GB Windows laptop,
+using the batched `/api/embed` path for ingest.
+
+**Correction:** earlier versions of this file (and of
+`run_locomo_eval.py`) had the single-hop and multi-hop labels swapped.
+LoCoMo category 1 is multi-hop (98% of its questions cite 2+ evidence
+turns) and category 4 is single-hop (5%). The rows above are relabeled;
+the underlying numbers for hash/spaCy are unchanged.
 
 ## Did we beat the benchmark? No — and here's the honest reasoning why
+
+**Update:** a trained sentence encoder (lever 1 below) was since tested
+via a local Ollama `nomic-embed-text`. It lifts Recall@5 to **44.5%**,
+5.2x the zero-config default and 1.6x the best spaCy result, with no API
+key. Single-hop questions now find their evidence turn in the top 5 more
+than half the time. Multi-hop (16.3%) is still weak: each of those
+questions needs ~3 separate turns, which is what lever 2 (fact
+extraction) addresses. The analysis below predates that run.
 
 Going from the hash placeholder to `en_core_web_lg` word vectors is a
 **real, substantial, measured improvement: roughly 3.2x on Recall@5**
@@ -81,8 +96,8 @@ any further heuristic tuning of the current approach.
 
 ## What's next (concrete, not aspirational)
 
-- Add `--provider openai`/`--provider cohere`/`--provider ollama`/
-  `--model en_core_web_lg` to `run_locomo_eval.py` as proper CLI flags
+- ~~Add `--provider ollama` / `--model en_core_web_lg` CLI flags~~ (done);
+  `--provider openai` / `--provider cohere` still to add
 - Implement a simple observation-extraction preprocessing step and
   measure it in isolation from the embedding-quality lever, to see how
   much each contributes independently
