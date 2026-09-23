@@ -13,16 +13,44 @@ before you do anything with the downloaded data beyond local evaluation).
 
 ## Results (run against this codebase, this session)
 
+### Current code (after the retrieval fixes below)
+
+```
+                  hash (default)   ollama nomic-embed-text   published comparable
+Recall@5              26.7%               58.3%                    93.9%
+Recall@10             37.6%               65.4%                      --
+MRR                   0.211               0.508                      --
+NDCG@5                0.202               0.496                      --
+
+Per category (Recall@5):
+  single-hop (n=841)  32.1%   64.1%
+  temporal   (n=321)  28.3%   68.3%
+  multi-hop  (n=282)   8.5%   29.7%
+```
+
+What changed (all general retrieval fixes, none LoCoMo-specific):
+retrieval scores no longer leak between queries via the stored objects;
+the reranker ranks on the normalized fused hybrid score instead of
+mixing raw cosine and BM25 scales; BM25 tokenization drops punctuation
+and stopwords and folds possessives/plurals; nomic's `search_query:` /
+`search_document:` prefixes are applied. To guard against overfitting,
+these were tuned on conversations 0-1 only; on the 8 held-out
+conversations (1,224 questions) Recall@5 was 58.3%, the same as the
+tuning split (58.4%). `mxbai-embed-large` was also tried and scored
+slightly lower (57.3% vs 58.4% on the tuning split).
+
+### Before those fixes
+
 Four configurations, same code, same dataset, same 1,444 evaluable
 questions:
 
 ```
-                  hash       spacy (md)    spacy (lg)    ollama          published
-                (default)     (local)       (local)     nomic-embed-text comparable
-Recall@5          8.5%        15.8%         27.3%          44.5%           93.9%
-Recall@10        14.5%        25.7%         40.7%          61.0%             --
-MRR              0.059        0.105         0.168          0.284             --
-NDCG@5           0.055        0.102         0.173          0.298             --
+                  hash       spacy (md)    spacy (lg)    ollama
+                (default)     (local)       (local)     nomic-embed-text
+Recall@5          8.5%        15.8%         27.3%          44.5%
+Recall@10        14.5%        25.7%         40.7%          61.0%
+MRR              0.059        0.105         0.168          0.284
+NDCG@5           0.055        0.102         0.173          0.298
 
 Per category (Recall@5):
   single-hop (n=841)   10.5%   19.7%   32.2%   54.4%
@@ -44,9 +72,8 @@ the underlying numbers for hash/spaCy are unchanged.
 ## Did we beat the benchmark? No — and here's the honest reasoning why
 
 **Update:** a trained sentence encoder (lever 1 below) was since tested
-via a local Ollama `nomic-embed-text`. It lifts Recall@5 to **44.5%**,
-5.2x the zero-config default and 1.6x the best spaCy result, with no API
-key. Single-hop questions now find their evidence turn in the top 5 more
+via a local Ollama `nomic-embed-text`. It lifted Recall@5 to **44.5%**, and
+the retrieval fixes above then took it to **58.3%**, with no API key. Single-hop questions now find their evidence turn in the top 5 more
 than half the time. Multi-hop (16.3%) is still weak: each of those
 questions needs ~3 separate turns, which is what lever 2 (fact
 extraction) addresses. The analysis below predates that run.

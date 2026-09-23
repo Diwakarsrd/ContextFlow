@@ -41,15 +41,18 @@ under BM25 alone, which would test nothing.
 **Evidence this actually has meaningful difficulty**: running it against
 the default `LocalHashEmbeddingProvider` (see docs/concepts/embeddings.md
 — a placeholder with no real semantic understanding) produces
-Recall@5 ≈ 61%, not 100% or 0%. A real embedding provider does score
+Recall@5 ≈ 92% (61% before the BM25 tokenizer fix), not 100% or 0%. A real embedding provider does score
 meaningfully higher; if a future change to retrieval logic doesn't move
 these numbers when it should, or moves them when it shouldn't, that's a
 signal to look closer.
 
 | Provider | Recall@5 | Precision@5 | MRR | NDCG@5 |
 |---|---|---|---|---|
-| hash placeholder (default) | 61.1% | 13.3% | 0.375 | 0.399 |
-| Ollama `nomic-embed-text` | 100.0% | 23.3% | 0.963 | 0.968 |
+| hash placeholder (default) | 91.7% | 21.1% | 0.810 | 0.826 |
+| Ollama `nomic-embed-text` | 100.0% | 23.3% | 1.000 | 0.993 |
+
+(Before the retrieval fixes in the same release: hash 61.1% / MRR 0.375,
+Ollama 100.0% / MRR 0.963.)
 
 Reproduce the second row with
 `CONTEXTOS_EMBEDDING_PROVIDER=ollama contextflow evaluate`. Precision@5
