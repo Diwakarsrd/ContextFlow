@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from contextflow.core.metadata import GraphStore, VectorStore
-from contextflow.storage.local import cosine_similarity
+from contextflow.storage.local import CosineIndex
 
 
 class FileVectorStore(VectorStore):
@@ -26,6 +26,7 @@ class FileVectorStore(VectorStore):
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self._vectors: dict[str, list[float]] = {}
         self._payloads: dict[str, dict[str, Any]] = {}
+        self._index = CosineIndex()
         self._load()
 
     def _load(self) -> None:
@@ -33,6 +34,7 @@ class FileVectorStore(VectorStore):
             data = json.loads(self.path.read_text() or "{}")
             self._vectors = data.get("vectors", {})
             self._payloads = data.get("payloads", {})
+            self._index.invalidate()
 
     def _save(self) -> None:
         self.path.write_text(json.dumps({"vectors": self._vectors, "payloads": self._payloads}))
@@ -40,6 +42,7 @@ class FileVectorStore(VectorStore):
     def upsert(self, id: str, embedding: list[float], payload: dict[str, Any]) -> None:
         self._vectors[id] = embedding
         self._payloads[id] = payload
+        self._index.invalidate()
         self._save()
 
     def upsert_batch(self, items: list[tuple[str, list[float], dict[str, Any]]]) -> None:
@@ -52,14 +55,11 @@ class FileVectorStore(VectorStore):
         for id, embedding, payload in items:
             self._vectors[id] = embedding
             self._payloads[id] = payload
+        self._index.invalidate()
         self._save()
 
     def search(self, query_embedding: list[float], limit: int = 10) -> list[tuple[str, float]]:
-        scored = [
-            (id, cosine_similarity(query_embedding, vec)) for id, vec in self._vectors.items()
-        ]
-        scored.sort(key=lambda pair: pair[1], reverse=True)
-        return scored[:limit]
+        return self._index.search(self._vectors, query_embedding, limit)
 
     def count(self) -> int:
         return len(self._vectors)

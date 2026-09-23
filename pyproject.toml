@@ -27,6 +27,7 @@ dependencies = [
     "sqlalchemy>=2.0",
     "httpx>=0.27",
     "rank-bm25>=0.2.2",
+    "numpy>=1.22",  # already required by rank-bm25; used directly for vector search
     "pyyaml>=6.0",
     "mcp==1.0.0",
 ]

@@ -68,8 +68,8 @@ def test_cohere_embedding_provider_calls_embed_endpoint():
 
 def test_ollama_embedding_provider_infers_dimensions():
     def handler(request: httpx.Request) -> httpx.Response:
-        assert request.url.path == "/api/embeddings"
-        return httpx.Response(200, json={"embedding": [0.1, 0.2, 0.3]})
+        assert request.url.path == "/api/embed"
+        return httpx.Response(200, json={"embeddings": [[0.1, 0.2, 0.3]]})
 
     provider = OllamaEmbeddingProvider(model="some-custom-model")
     provider._client = httpx.Client(
@@ -134,11 +134,9 @@ def test_ollama_applies_model_query_and_document_prefixes():
 
     def handler(request: httpx.Request) -> httpx.Response:
         body = json.loads(request.content)
-        if request.url.path == "/api/embed":
-            seen.extend(body["input"])
-            return httpx.Response(200, json={"embeddings": [[1.0] for _ in body["input"]]})
-        seen.append(body["prompt"])
-        return httpx.Response(200, json={"embedding": [1.0]})
+        assert request.url.path == "/api/embed"
+        seen.extend(body["input"])
+        return httpx.Response(200, json={"embeddings": [[1.0] for _ in body["input"]]})
 
     provider = OllamaEmbeddingProvider(model="nomic-embed-text")
     provider._client = httpx.Client(
