@@ -24,7 +24,7 @@ from pathlib import Path
 import yaml
 
 from contextflow.core.context import ContextObject
-from contextflow.engine import ContextEngine
+from contextflow.engine import ContextEngine, _provider_from_env
 from contextflow.evaluation.retrieval import (
     mean_reciprocal_rank,
     ndcg_at_k,
@@ -57,7 +57,9 @@ def run_benchmark(benchmark_path: str, k: int = 5) -> BenchmarkResult:
 
     # Use explicit corpus IDs as ContextObject IDs so relevance judgments
     # (which reference those IDs) line up with retrieval results.
-    engine = ContextEngine()
+    # Honor CONTEXTOS_EMBEDDING_PROVIDER like the rest of the CLI, so the
+    # benchmark measures the provider users actually configured.
+    engine = ContextEngine(embedding_provider=_provider_from_env())
     for entry in corpus:
         obj = ContextObject(id=entry["id"], content=entry["content"], source="benchmark")
         engine._semantic.index(obj)
