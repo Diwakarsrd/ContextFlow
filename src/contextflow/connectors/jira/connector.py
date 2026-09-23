@@ -9,7 +9,7 @@ from collections.abc import Iterable
 from datetime import datetime, timezone
 from typing import Any
 
-import requests
+import httpx
 
 from contextflow.connectors.base import Connector
 from contextflow.core.context import ContextObject
@@ -38,7 +38,7 @@ class JiraConnector(Connector):
 
         self._mock_mode = False
         url = f"https://{self.domain}/rest/api/3/myself"
-        response = requests.get(url, auth=(str(self.email), str(self.api_token)))
+        response = httpx.get(url, auth=(str(self.email), str(self.api_token)))
         if response.status_code != 200:
             raise ValueError(f"Failed to authenticate with Jira: {response.text}")
 
@@ -59,8 +59,8 @@ class JiraConnector(Connector):
             return
 
         url = f"https://{self.domain}/rest/api/3/search"
-        params = {"jql": resource_id, "maxResults": 50}
-        response = requests.get(url, auth=(str(self.email), str(self.api_token)), params=params)
+        params: dict[str, str | int] = {"jql": resource_id, "maxResults": 50}
+        response = httpx.get(url, auth=(str(self.email), str(self.api_token)), params=params)
         response.raise_for_status()
 
         data = response.json()

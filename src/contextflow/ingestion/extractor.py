@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import json
 import os
+
 import httpx
-from typing import List
+
 
 class ObservationExtractor:
     """ Phase 9: Zero-Shot Observation Extraction Pipeline.
@@ -15,7 +16,7 @@ class ObservationExtractor:
         self.base_url = base_url
         self.model = model
     
-    def extract(self, text: str) -> List[str]:
+    def extract(self, text: str) -> list[str]:
         if not self.api_key:
             return [text]  # Fallback to raw text if no LLM key is configured
             
@@ -43,5 +44,5 @@ class ObservationExtractor:
                 data = res.json()
                 content = json.loads(data["choices"][0]["message"]["content"])
                 return content.get("observations", [text])
-        except Exception:
+        except (httpx.HTTPError, json.JSONDecodeError, KeyError, IndexError, TypeError):
             return [text]  # Fail gracefully to allow ingestion to continue synchronously

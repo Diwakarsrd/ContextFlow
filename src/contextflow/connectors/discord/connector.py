@@ -9,7 +9,7 @@ from collections.abc import Iterable
 from datetime import datetime, timezone
 from typing import Any
 
-import requests
+import httpx
 
 from contextflow.connectors.base import Connector
 from contextflow.core.context import ContextObject
@@ -33,7 +33,7 @@ class DiscordConnector(Connector):
             return
 
         headers = {"Authorization": f"Bot {self.bot_token}"}
-        response = requests.get("https://discord.com/api/v10/users/@me", headers=headers)
+        response = httpx.get("https://discord.com/api/v10/users/@me", headers=headers)
         if response.status_code != 200:
             raise ValueError(f"Failed to authenticate with Discord API: {response.status_code}")
 
@@ -55,7 +55,7 @@ class DiscordConnector(Connector):
 
         url = f"https://discord.com/api/v10/channels/{resource_id}/messages?limit=50"
         headers = {"Authorization": f"Bot {self.bot_token}"}
-        response = requests.get(url, headers=headers)
+        response = httpx.get(url, headers=headers)
         response.raise_for_status()
 
         yield from response.json()

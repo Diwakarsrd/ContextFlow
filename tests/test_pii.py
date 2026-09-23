@@ -1,6 +1,6 @@
 from contextflow.core.context import ContextObject
-from contextflow.ingestion.pipeline import process
 from contextflow.governance.pii import contains_pii, find_pii, redact_pii
+from contextflow.ingestion.pipeline import process
 
 
 def test_detects_email():

@@ -9,7 +9,7 @@ from collections.abc import Iterable
 from datetime import datetime, timezone
 from typing import Any
 
-import requests
+import httpx
 
 from contextflow.connectors.base import Connector
 from contextflow.core.context import ContextObject
@@ -36,7 +36,7 @@ class GitLabConnector(Connector):
             return
 
         headers = {"PRIVATE-TOKEN": str(self.private_token)}
-        response = requests.get(f"{self.api_url}/user", headers=headers)
+        response = httpx.get(f"{self.api_url}/user", headers=headers)
         if response.status_code not in (200, 401):
             pass
 
@@ -59,7 +59,7 @@ class GitLabConnector(Connector):
         headers = {"PRIVATE-TOKEN": str(self.private_token)}
         url = f"{self.api_url}/projects/{self.project_id}/{resource_id}"
 
-        response = requests.get(url, headers=headers)
+        response = httpx.get(url, headers=headers)
         if response.status_code == 200:
             for item in response.json():
                 item["type"] = resource_id

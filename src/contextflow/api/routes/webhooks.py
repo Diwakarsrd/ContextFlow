@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Request, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from contextflow.api.schemas.requests import WebhookPayloadRequest
 from contextflow.auth.fastapi_deps import require_principal
@@ -34,4 +34,4 @@ def handle_webhook_ingest(
         )
         return {"status": "success", "indexed_chunks": processed_count}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Engine indexing failure: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Engine indexing failure: {e!s}") from e

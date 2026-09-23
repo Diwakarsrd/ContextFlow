@@ -23,30 +23,24 @@ class PluginRegistry:
 
     def _discover(self) -> None:
         # Discover third-party connectors
-        try:
-            for entry_point in importlib.metadata.entry_points(group="contextflow.connectors"):
-                try:
-                    plugin_class = entry_point.load()
-                    if issubclass(plugin_class, Connector):
-                        self.connectors[entry_point.name] = plugin_class
-                        logger.info(f"Loaded plugin connector: {entry_point.name}")
-                except Exception as e:
-                    logger.warning(f"Failed to load connector {entry_point.name}: {e}")
-        except Exception:
-            pass
-            
+        for entry_point in importlib.metadata.entry_points(group="contextflow.connectors"):
+            try:
+                plugin_class = entry_point.load()
+                if issubclass(plugin_class, Connector):
+                    self.connectors[entry_point.name] = plugin_class
+                    logger.info(f"Loaded plugin connector: {entry_point.name}")
+            except Exception as e:  # noqa: BLE001 - a broken plugin must not crash the host
+                logger.warning(f"Failed to load connector {entry_point.name}: {e}")
+
         # Discover third-party embeddings
-        try:
-            for entry_point in importlib.metadata.entry_points(group="contextflow.embeddings"):
-                try:
-                    plugin_class = entry_point.load()
-                    if issubclass(plugin_class, EmbeddingProvider):
-                        self.embeddings[entry_point.name] = plugin_class
-                        logger.info(f"Loaded plugin embedding provider: {entry_point.name}")
-                except Exception as e:
-                    logger.warning(f"Failed to load embedding {entry_point.name}: {e}")
-        except Exception:
-            pass
+        for entry_point in importlib.metadata.entry_points(group="contextflow.embeddings"):
+            try:
+                plugin_class = entry_point.load()
+                if issubclass(plugin_class, EmbeddingProvider):
+                    self.embeddings[entry_point.name] = plugin_class
+                    logger.info(f"Loaded plugin embedding provider: {entry_point.name}")
+            except Exception as e:  # noqa: BLE001 - a broken plugin must not crash the host
+                logger.warning(f"Failed to load embedding {entry_point.name}: {e}")
 
     def get_connector(self, name: str, **kwargs: Any) -> Connector:
         if name not in self.connectors:

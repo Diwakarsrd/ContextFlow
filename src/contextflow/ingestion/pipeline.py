@@ -4,12 +4,11 @@ connector's raw output, producing ContextObjects ready for indexing."""
 from __future__ import annotations
 
 from contextflow.core.context import ContextObject
+from contextflow.governance.pii import redact_pii
 from contextflow.ingestion.chunking import chunk_text
 from contextflow.ingestion.deduplication import deduplicate
 from contextflow.ingestion.extractor import ObservationExtractor
-
 from contextflow.ingestion.normalization import normalize_text
-from contextflow.governance.pii import redact_pii
 
 
 def process(objects: list[ContextObject], chunk_size: int = 1000, extract_observations: bool = False) -> list[ContextObject]:
