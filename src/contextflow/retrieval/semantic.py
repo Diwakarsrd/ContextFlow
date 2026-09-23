@@ -15,11 +15,13 @@ class SemanticRetriever:
         metadata_store: MetadataStore,
         embed_fn: Callable[[str], list[float]],
         embed_batch_fn: Callable[[list[str]], list[list[float]]] | None = None,
+        embed_query_fn: Callable[[str], list[float]] | None = None,
     ) -> None:
         self.vector_store = vector_store
         self.metadata_store = metadata_store
         self.embed_fn = embed_fn
         self.embed_batch_fn = embed_batch_fn
+        self.embed_query_fn = embed_query_fn or embed_fn
 
     def index(self, obj: ContextObject) -> None:
         embedding = self.embed_fn(obj.content)
@@ -48,12 +50,14 @@ class SemanticRetriever:
         self.metadata_store.put_batch(objects)
 
     def retrieve(self, query: str, limit: int = 10) -> list[ContextObject]:
-        query_embedding = self.embed_fn(query)
+        query_embedding = self.embed_query_fn(query)
         hits = self.vector_store.search(query_embedding, limit=limit)
         results = []
         for obj_id, score in hits:
             obj = self.metadata_store.get(obj_id)
             if obj is not None:
-                obj.metadata["_semantic_score"] = score
-                results.append(obj)
+                # Score a per-query copy: writing into the stored object
+                # would leak this query's score into later queries.
+                metadata = {**obj.metadata, "_semantic_score": score}
+                results.append(obj.model_copy(update={"metadata": metadata}))
         return results

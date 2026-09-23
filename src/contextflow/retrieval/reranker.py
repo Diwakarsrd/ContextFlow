@@ -9,6 +9,15 @@ from abc import ABC, abstractmethod
 from contextflow.core.context import ContextObject
 
 
+def retrieval_score(obj: ContextObject) -> float:
+    """The fused hybrid score when present; otherwise whichever single
+    retriever score the object carries (e.g. a retriever used directly)."""
+    for key in ("_retrieval_score", "_semantic_score", "_keyword_score"):
+        if key in obj.metadata:
+            return float(obj.metadata[key])
+    return 0.0
+
+
 class Reranker(ABC):
     @abstractmethod
     def rerank(self, query: str, candidates: list[ContextObject]) -> list[ContextObject]: ...
@@ -30,7 +39,7 @@ class QualityWeightedReranker(Reranker):
 
     def rerank(self, query: str, candidates: list[ContextObject]) -> list[ContextObject]:
         def score(obj: ContextObject) -> float:
-            base = obj.metadata.get("_semantic_score") or obj.metadata.get("_keyword_score") or 0.0
+            base = retrieval_score(obj)
             return (
                 base
                 + self.freshness_weight * obj.freshness

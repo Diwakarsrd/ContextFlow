@@ -127,3 +127,31 @@ def test_engine_ingest_embeds_through_provider_batch_api():
     assert {obj.id for obj in engine.retrieve("document", limit=5)} == {
         f"doc{i}" for i in range(5)
     }
+
+
+def test_ollama_applies_model_query_and_document_prefixes():
+    seen: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        body = json.loads(request.content)
+        if request.url.path == "/api/embed":
+            seen.extend(body["input"])
+            return httpx.Response(200, json={"embeddings": [[1.0] for _ in body["input"]]})
+        seen.append(body["prompt"])
+        return httpx.Response(200, json={"embedding": [1.0]})
+
+    provider = OllamaEmbeddingProvider(model="nomic-embed-text")
+    provider._client = httpx.Client(
+        base_url="http://localhost:11434", transport=httpx.MockTransport(handler)
+    )
+    provider.embed_query("refund policy")
+    provider.embed("Refunds take 5 days.")
+    provider.embed_batch(["Refunds take 5 days."])
+    assert seen == [
+        "search_query: refund policy",
+        "search_document: Refunds take 5 days.",
+        "search_document: Refunds take 5 days.",
+    ]
+
+    plain = OllamaEmbeddingProvider(model="some-custom-model", query_prefix="")
+    assert (plain.query_prefix, plain.document_prefix) == ("", "")

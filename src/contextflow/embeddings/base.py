@@ -26,6 +26,12 @@ class EmbeddingProvider(ABC):
     @abstractmethod
     def embed(self, text: str) -> list[float]: ...
 
+    def embed_query(self, text: str) -> list[float]:
+        """Embed a search query. Default: same as `embed`. Override for
+        asymmetric models trained to embed queries differently from the
+        documents they should match (e.g. nomic's `search_query:` prefix)."""
+        return self.embed(text)
+
     def embed_batch(self, texts: list[str]) -> list[list[float]]:
         """Default: embed one at a time. Override for providers with a
         real batch endpoint (OpenAI, Cohere) — it's meaningfully faster
