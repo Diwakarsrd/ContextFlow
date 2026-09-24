@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "contextflow-engine"
-version = "0.1.0"
+version = "0.2.0"
 description = "Open-source context infrastructure for AI agents."
 readme = "README.md"
 license = { text = "Apache-2.0" }
@@ -29,7 +29,7 @@ dependencies = [
     "rank-bm25>=0.2.2",
     "numpy>=1.22",  # already required by rank-bm25; used directly for vector search
     "pyyaml>=6.0",
-    "mcp==1.0.0",
+    "mcp>=2.0,<3",
 ]
 
 [project.optional-dependencies]
@@ -47,9 +47,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourorg/contextflow"
-Documentation = "https://github.com/yourorg/contextflow/tree/main/docs"
-Issues = "https://github.com/yourorg/contextflow/issues"
+Homepage = "https://github.com/Diwakarsrd/ContextFlow"
+Documentation = "https://github.com/Diwakarsrd/ContextFlow/tree/main/docs"
+Issues = "https://github.com/Diwakarsrd/ContextFlow/issues"
 
 [project.scripts]
 contextflow = "contextflow.cli.main:app"

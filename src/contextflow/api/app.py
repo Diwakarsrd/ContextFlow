@@ -42,7 +42,7 @@ def create_app(
     app = FastAPI(
         title="ContextFlow API",
         description="REST API for the ContextFlow context engine.",
-        version="0.1.0",
+        version="0.2.0",
     )
     app.state.engine = engine or ContextEngine()
     app.state.api_key_store = api_key_store or APIKeyStore.from_env_and_file()

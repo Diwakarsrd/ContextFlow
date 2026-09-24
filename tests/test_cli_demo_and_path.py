@@ -41,3 +41,31 @@ def test_search_with_wrong_path_finds_nothing(tmp_path, monkeypatch):
     result = runner.invoke(app, ["search", "payments", "--path", "workspace_b"])
     assert result.exit_code == 0
     assert "No results" in result.output
+
+
+def test_mcp_and_serve_use_the_ingested_workspace(tmp_path, monkeypatch):
+    # Regression: both commands used to start an empty in-memory engine,
+    # so an agent connected over MCP/REST could never see ingested docs.
+    from typer.testing import CliRunner
+
+    import contextflow.mcp.server as mcp_server
+    from contextflow.cli.main import app
+
+    docs = tmp_path / "docs"
+    docs.mkdir()
+    (docs / "refunds.md").write_text("Refunds are processed within five business days.")
+    workspace = str(tmp_path / ".contextflow")
+    runner = CliRunner()
+    assert runner.invoke(app, ["ingest", str(docs), "--path", workspace]).exit_code == 0
+
+    captured = {}
+    monkeypatch.setattr(mcp_server, "main", lambda **kw: captured.update(mcp=kw["engine"]))
+    import uvicorn
+
+    monkeypatch.setattr(uvicorn, "run", lambda app_, **kw: captured.update(api=app_))
+    assert runner.invoke(app, ["mcp", "--path", workspace]).exit_code == 0
+    assert runner.invoke(app, ["serve", "--path", workspace]).exit_code == 0
+
+    for engine in (captured["mcp"], captured["api"].state.engine):
+        hits = engine.retrieve("how long do refunds take", limit=1)
+        assert hits and "five business days" in hits[0].content

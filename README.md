@@ -1,494 +1,168 @@
 # ContextFlow
 
-**Open-source context infrastructure for AI agents.**
+**An open-source context engine for AI agents.** It decides what your agent
+sees: the right pieces of your documents, filtered by who's asking,
+compiled into a token-budgeted Context Pack, and served over MCP to Claude,
+Cursor or your own agents. Runs fully locally.
 
-<p align="center">
-  <img src="https://img.shields.io/badge/build-passing-brightgreen" alt="Build Status">
+<p>
+  <a href="https://github.com/Diwakarsrd/ContextFlow/actions/workflows/ci.yml"><img src="https://github.com/Diwakarsrd/ContextFlow/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://pypi.org/project/contextflow-engine/"><img src="https://img.shields.io/pypi/v/contextflow-engine?color=blue" alt="PyPI"></a>
   <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10+">
-  <a href="https://pypi.org/project/contextflow-engine/"><img src="https://img.shields.io/pypi/v/contextflow-engine?color=blue" alt="PyPI version"></a>
-
-  <img src="https://img.shields.io/badge/MCP-native-orange" alt="MCP Native">
-  <img src="https://img.shields.io/badge/license-Apache%202.0-lightgrey" alt="License">
+  <img src="https://img.shields.io/badge/MCP-native-orange" alt="MCP native">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-lightgrey" alt="Apache 2.0"></a>
 </p>
 
+[Quick start](#quick-start) · [Use with Claude/Cursor](#use-it-from-claude-cursor-or-any-mcp-agent) · [Benchmarks](#benchmarks) · [Architecture](ARCHITECTURE.md) · [Contributing](CONTRIBUTING.md)
 
-Give your agents the right context at the right time — regardless of which
-LLM, agent framework, or data stack you use.
+## Why
 
-[Quick Start](#quick-start) · [Docs](docs/getting_started.md) · [Architecture](ARCHITECTURE.md) · [Contributing](CONTRIBUTING.md)
-
----
-
-
-## Quick Start
-
-### Installation
-ContextFlow is actively published to PyPI for enterprise deployment.
-`ash
-pip install contextflow-engine
-`
-
-
-
-## Why ContextFlow
-
-**Before — naive RAG**
+Naive RAG hands the model the top 5 chunks from a vector database. Real
+agents need more than that: evidence from *several* documents, only what
+the user is allowed to see, the newest version when sources disagree, and
+all of it inside a token budget.
 
 ```
-Agent → Vector DB → Top 5 chunks → LLM
+Agent ──► ContextFlow ──► Context Pack ──► LLM
+             │
+             ├── hybrid retrieval (semantic + BM25, rank fusion)
+             ├── permissions & tenant isolation
+             ├── freshness / confidence / trust reranking
+             ├── conflict detection
+             ├── knowledge graph & agent memory
+             └── token-budgeted compilation
 ```
 
-**With ContextFlow**
+## Benchmarks
 
-```
-Agent → Context Engine → Context Pack → LLM
-              │
-              ├── Semantic Search
-              ├── Knowledge Graph
-              ├── Memory
-              ├── Permissions
-              ├── Freshness
-              ├── Conflict Detection
-              └── Context Compiler
-```
+On **MultiHop-RAG** (COLING 2024), 609 news articles, 2,255 questions
+whose evidence spans 2–4 different articles, same chunks and embeddings
+in every row:
 
-AI agents don't primarily need more tokens. They need the right context at
-the right time.
+| | Hits@4 | Hits@10 | MRR@10 |
+|---|---|---|---|
+| Vector-only RAG (`nomic-embed-text`, local) | 0.577 | 0.768 | 0.449 |
+| **ContextFlow** (same embeddings) | **0.675** | **0.830** | **0.540** |
+| Paper's best: voyage-02 + bge-reranker-large | 0.663 | 0.747 | 0.586 |
 
-## Quick Start
+Within the same 2,048-token budget, a Context Pack contains *all* the
+evidence a question needs 1.5x as often as naive top-k (23.1% vs 15.4%).
+
+Everything runs on a laptop with a free local model, no API key.
+Caveats and methodology (including a MAP@10 figure we don't claim) are
+in [benchmarks/external/multihop_rag/RESULTS.md](benchmarks/external/multihop_rag/RESULTS.md).
+Conversational-memory results (LoCoMo) are in
+[benchmarks/external/locomo/RESULTS.md](benchmarks/external/locomo/RESULTS.md).
+
+## Quick start
 
 ```bash
-git clone https://github.com/yourorg/contextflow
-cd contextflow
-pip install -e .
+pip install contextflow-engine
 contextflow demo
 ```
 
-That's the whole thing — `contextflow demo` writes sample docs, ingests
-them, runs a search, and builds a Context Pack, so you see the full
-flow work with zero configuration before touching your own data. This
-has been verified end-to-end from a clean clone into a fresh virtualenv
-with no pre-existing dependencies — see `docs/getting_started.md` for
-the exact commands.
+`demo` writes sample docs, ingests them, searches, and builds a Context
+Pack, with zero configuration.
 
-For your own data:
+On your own files:
 
 ```bash
 contextflow init
-contextflow ingest ./your-docs
-contextflow search "your query"
-contextflow context-pack "your question"
+contextflow ingest ./docs
+contextflow search "how long do refunds take"
+contextflow context-pack "how long do refunds take"
+contextflow trace "how long do refunds take"   # see what each pipeline stage did
 ```
 
-`ingest`, `search`, and `context-pack` are separate commands that
-persist to `.contextflow/` on disk — no long-running process required.
+Everything persists to `./.contextflow/` (use `--path` for another
+workspace); no server process required.
 
-For Postgres/Qdrant/Neo4j instead of the local-first defaults:
+**For real retrieval quality, use real embeddings.** The zero-config
+default is a hashing placeholder with no semantic understanding. Local
+and free:
 
 ```bash
-cp .env.example .env
-docker compose up
+ollama pull nomic-embed-text
+export CONTEXTOS_EMBEDDING_PROVIDER=ollama   # or openai / cohere
+contextflow ingest ./docs
 ```
 
-```python
-from contextflow import ContextEngine
-
-engine = ContextEngine()
-
-context = engine.retrieve(
-    query="Why did our revenue drop last quarter?"
-)
-
-print(context)
-```
-
-> **Note on retrieval quality:** with no configuration, semantic search
-> uses a dependency-free hashing placeholder with no real language
-> understanding — fine for the quickstart above, not for real retrieval
-> quality. Set `CONTEXTOS_EMBEDDING_PROVIDER=openai` (or `ollama` /
-> `cohere`) plus the matching API key before ingesting real data:
->
-> ```bash
-> export CONTEXTOS_EMBEDDING_PROVIDER=openai
-> export OPENAI_API_KEY=sk-...
-> contextflow ingest ./docs
-> ```
->
-> See `src/contextflow/embeddings/` — Ollama runs fully locally if you'd
-> rather not use a hosted API.
-
-### Other local-first commands
+## Use it from Claude, Cursor or any MCP agent
 
 ```bash
-contextflow trace "your query"    # see exactly what the retrieval pipeline did
-contextflow mcp                   # expose an MCP server to Claude, Cursor, etc.
+contextflow ingest ./docs --path /abs/path/to/.contextflow
 ```
 
-`context-pack` prints a readable panel:
-
-```
-╭──────────────────────────── Context Pack ────────────────────────────╮
-│ Query: What decisions were made about payments?                      │
-│                                                                        │
-│ Documents                                                             │
-│   • Stripe was selected as the payment processor. The migration…     │
-│                                                                        │
-│ Sources                                                                │
-│   • filesystem                                                        │
-│                                                                        │
-│ Confidence: 100%                                                      │
-╰────────────────────────────────────────────────────────────────────────╯
-```
-
-Swap in Postgres, Qdrant, and Neo4j later when you need to scale — see
-[docs/deployment](docs/getting_started.md).
-
-## The core abstraction: Context Pack
-
-Instead of raw chunks:
-
-```python
-context = engine.context_pack(
-    task="prepare customer renewal",
-    entity="Acme",
-)
-```
+Claude Desktop (`claude_desktop_config.json`) or any MCP client:
 
 ```json
 {
-  "entity": "Acme",
-  "facts": [],
-  "people": [],
-  "projects": [],
-  "conversations": [],
-  "documents": [],
-  "decisions": [],
-  "risks": [],
-  "relationships": [],
-  "sources": [],
-  "conflicts": [],
-  "confidence": 0.94
+  "mcpServers": {
+    "contextflow": {
+      "command": "contextflow",
+      "args": ["mcp", "--path", "/abs/path/to/.contextflow"],
+      "env": { "CONTEXTOS_EMBEDDING_PROVIDER": "ollama" }
+    }
+  }
 }
 ```
 
-## MCP native
+Tools exposed: `search_context`, `get_context_pack`, `get_entity`,
+`get_relationships`, `get_context_graph`, `get_memory`, `remember`,
+`get_source`, `explain_context`, `trace_query`. Use `--transport http`
+for remote agents (Bearer-token auth via `contextflow auth create-key`).
 
-ContextFlow ships an MCP server out of the box, so any MCP-compatible agent
-(Claude, Cursor, custom agents, ...) can call:
+A REST API serves the same workspace: `contextflow serve --path ...`
+(TypeScript client in [`sdk/typescript`](sdk/typescript)).
 
+## Python
+
+```python
+from contextflow import ContextEngine, ContextObject
+from contextflow.embeddings.ollama import OllamaEmbeddingProvider
+
+engine = ContextEngine(embedding_provider=OllamaEmbeddingProvider())
+engine.ingest([
+    ContextObject(
+        content="Finance decided to switch payment processors to Stripe in March.",
+        source="notion",
+        permissions=["alice"],  # only alice may see this
+    ),
+    ContextObject(
+        content="The payments migration to Stripe-native subscriptions ships in Q4.",
+        source="slack",
+    ),
+])
+
+pack = engine.context_pack("What did we decide about payments?", principal="bob")
+# bob's pack contains only the Slack message; alice's would include both.
 ```
-search_context()
-get_entity()
-get_context_pack()
-get_relationships()
-get_memory()
-get_source()
-explain_context()
-```
 
-```bash
-contextflow mcp
-```
-
-## Modular by design
-
-Don't want the knowledge graph? Don't install it. Every subsystem is an
-interface with swappable backends:
-
-| Layer     | Interface        | Built-in backends                  |
-|---
-
-
-## Quick Start
-
-### Installation
-ContextFlow is actively published to PyPI for enterprise deployment.
-`ash
-pip install contextflow-engine
-`
-
----
-
-
-## Quick Start
-
-### Installation
-ContextFlow is actively published to PyPI for enterprise deployment.
-`ash
-pip install contextflow-engine
-`
-
----
-
-
-## Quick Start
-
-### Installation
-ContextFlow is actively published to PyPI for enterprise deployment.
-`ash
-pip install contextflow-engine
-`
-
---|---
-
-
-## Quick Start
-
-### Installation
-ContextFlow is actively published to PyPI for enterprise deployment.
-`ash
-pip install contextflow-engine
-`
-
----
-
-
-## Quick Start
-
-### Installation
-ContextFlow is actively published to PyPI for enterprise deployment.
-`ash
-pip install contextflow-engine
-`
-
----
-
-
-## Quick Start
-
-### Installation
-ContextFlow is actively published to PyPI for enterprise deployment.
-`ash
-pip install contextflow-engine
-`
-
----
-
-
-## Quick Start
-
-### Installation
-ContextFlow is actively published to PyPI for enterprise deployment.
-`ash
-pip install contextflow-engine
-`
-
----
-
-
-## Quick Start
-
-### Installation
-ContextFlow is actively published to PyPI for enterprise deployment.
-`ash
-pip install contextflow-engine
-`
-
----
-
-
-## Quick Start
-
-### Installation
-ContextFlow is actively published to PyPI for enterprise deployment.
-`ash
-pip install contextflow-engine
-`
-
--|---
-
-
-## Quick Start
-
-### Installation
-ContextFlow is actively published to PyPI for enterprise deployment.
-`ash
-pip install contextflow-engine
-`
-
----
-
-
-## Quick Start
-
-### Installation
-ContextFlow is actively published to PyPI for enterprise deployment.
-`ash
-pip install contextflow-engine
-`
-
----
-
-
-## Quick Start
-
-### Installation
-ContextFlow is actively published to PyPI for enterprise deployment.
-`ash
-pip install contextflow-engine
-`
-
----
-
-
-## Quick Start
-
-### Installation
-ContextFlow is actively published to PyPI for enterprise deployment.
-`ash
-pip install contextflow-engine
-`
-
----
-
-
-## Quick Start
-
-### Installation
-ContextFlow is actively published to PyPI for enterprise deployment.
-`ash
-pip install contextflow-engine
-`
-
----
-
-
-## Quick Start
-
-### Installation
-ContextFlow is actively published to PyPI for enterprise deployment.
-`ash
-pip install contextflow-engine
-`
-
----
-
-
-## Quick Start
-
-### Installation
-ContextFlow is actively published to PyPI for enterprise deployment.
-`ash
-pip install contextflow-engine
-`
-
----
-
-
-## Quick Start
-
-### Installation
-ContextFlow is actively published to PyPI for enterprise deployment.
-`ash
-pip install contextflow-engine
-`
-
----
-
-
-## Quick Start
-
-### Installation
-ContextFlow is actively published to PyPI for enterprise deployment.
-`ash
-pip install contextflow-engine
-`
-
----
-
-
-## Quick Start
-
-### Installation
-ContextFlow is actively published to PyPI for enterprise deployment.
-`ash
-pip install contextflow-engine
-`
-
----
-
-
-## Quick Start
-
-### Installation
-ContextFlow is actively published to PyPI for enterprise deployment.
-`ash
-pip install contextflow-engine
-`
-
----
-
-
-## Quick Start
-
-### Installation
-ContextFlow is actively published to PyPI for enterprise deployment.
-`ash
-pip install contextflow-engine
-`
-
--|
-| Vector    | `VectorStore`     | pgvector, Qdrant                    |
-| Graph     | `GraphStore`      | Neo4j (optional)                    |
-| Metadata  | `MetadataStore`   | SQLite, PostgreSQL                  |
-| Connector | `Connector`       | GitHub, PostgreSQL, filesystem      |
-
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the full picture and
-[ROADMAP.md](ROADMAP.md) for what's built vs. planned in v0.1.
-
-## Repository layout
-
-```
-src/contextflow/
-├── core/          # Context Object, Context Pack, Entity, Relationship
-├── ingestion/      # Parsing, chunking, normalization, dedup
-├── retrieval/      # Semantic, keyword, graph, hybrid, reranking
-├── graph/          # Graph building, entity resolution, traversal
-├── memory/         # Working / session / user / agent / org memory
-├── compiler/       # Context compilation, compression, conflict detection
-├── governance/      # Permissions, policies, PII detection, audit
-├── evaluation/      # Retrieval + faithfulness benchmarks
-├── connectors/      # GitHub, PostgreSQL, filesystem (+ Connector SDK)
-├── mcp/             # MCP server and tools
-├── api/             # REST API
-└── cli/             # `contextflow` command-line tool
-```
+## What's in the box
+
+| Area | Status |
+|---|---|
+| Retrieval | Hybrid semantic + BM25 with reciprocal rank fusion, reranking, tracing |
+| Embeddings | Ollama, OpenAI, Cohere, spaCy, or zero-config hash placeholder |
+| Governance | Per-object permissions, RBAC roles, tenant isolation, PII redaction, audit log |
+| Compilation | Token-budgeted Context Packs with dedup and conflict detection |
+| Memory | Session / user / agent / org memory, cross-agent handoff |
+| Connectors | Filesystem, GitHub, PostgreSQL (as a source), Slack, Notion, GitLab, Jira, Discord |
+| Interfaces | CLI, MCP (stdio + HTTP), REST API, Python, TypeScript SDK |
+| Storage | Local: SQLite metadata + local vector/graph files (numpy-vectorized search) |
+
+**Not built yet** (see [ROADMAP.md](ROADMAP.md)): Qdrant / pgvector / Neo4j
+storage backends, a learned reranker, and LLM-graded answer evaluation.
+The Slack, Notion, GitLab, Jira and Discord connectors are tested
+against mocked APIs, not live workspaces.
 
 ## Status
 
-ContextFlow is v0.1 — early, opinionated, and built for contribution. What's
-real today: persistent local storage, hybrid retrieval, real embedding
-providers (OpenAI/Cohere/Ollama), API key auth shared by the REST API and
-MCP-over-HTTP, RBAC + tenant isolation + pattern-based PII detection +
-queryable audit logging, five-tier memory (session/user/agent/org
-persisted, working ephemeral by design), real pipeline tracing/
-observability (`contextflow trace`), a real TypeScript SDK (`sdk/typescript`)
-tested against a live server, ContextBench v0.1 (a real, non-trivial
-retrieval benchmark with Recall/Precision/MRR/NDCG and an honestly
-documented synthetic-data methodology), real measured performance/scale
-benchmarks that found and fixed a genuine O(n²) ingestion bug
-(`contextflow benchmark-scale`), GitHub/PostgreSQL/filesystem
-connectors proven end-to-end against real infrastructure, Slack and
-Notion connectors proven against mocked APIs but not yet live workspaces,
-a naive-but-functional knowledge graph, a runnable evaluation harness, and
-the CLI/REST/MCP surfaces above.
-
-**The honest gap:** benchmarked against LoCoMo (a real external benchmark
-also used by Mem0/Zep/Letta — see `benchmarks/external/locomo/`), the
-zero-config default scored 8.5% Recall@5. The best configuration tested
-in this environment — `SpacyEmbeddingProvider` with `en_core_web_lg`,
-fully local, zero API keys — reached **27.3%**, a real ~3.2x improvement.
-**This does not beat the benchmark**: a comparable published system
-reports 93.9% on the same dataset. The remaining gap has two specific,
-identified causes (no trained sentence encoder or LLM-based fact
-extraction was accessible in this sandbox), not a mystery — see
-`benchmarks/external/locomo/RESULTS.md` for the full honest accounting.
-
-See [ROADMAP.md](ROADMAP.md) for the full
-phased plan — including what's shipped, what's partially built, and what's
-still just direction — and [CONTRIBUTING.md](CONTRIBUTING.md) for how to
-help.
+v0.2, alpha. The API may change. Issues and PRs welcome: see
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-Apache 2.0 — see [LICENSE](LICENSE).
+Apache 2.0, see [LICENSE](LICENSE). Benchmark datasets are downloaded at
+run time under their own licenses (MultiHop-RAG: ODC-BY; LoCoMo: CC
+BY-NC 4.0) and are not redistributed.

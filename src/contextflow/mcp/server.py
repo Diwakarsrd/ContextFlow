@@ -142,8 +142,13 @@ def build_server(
     return server
 
 
-def main(transport: str = "stdio", host: str = "127.0.0.1", port: int = 8765) -> None:
-    server = build_server()
+def main(
+    transport: str = "stdio",
+    host: str = "127.0.0.1",
+    port: int = 8765,
+    engine: ContextEngine | None = None,
+) -> None:
+    server = build_server(engine=engine)
     if transport == "stdio":
         server.run()
     elif transport == "http":
