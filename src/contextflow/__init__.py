@@ -5,7 +5,7 @@ from contextflow.core.context_pack import ContextPack
 from contextflow.embeddings.base import EmbeddingProvider, LocalHashEmbeddingProvider
 from contextflow.engine import ContextEngine, local_workspace
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "ContextEngine",

@@ -209,11 +209,14 @@ def trace(
 def serve(
     host: str = typer.Option("127.0.0.1"),
     port: int = typer.Option(8000),
+    workspace: str = typer.Option(".contextflow", "--path", help="Workspace directory to use"),
 ) -> None:
-    """Run the REST API server."""
+    """Run the REST API server over the workspace `contextflow ingest` wrote."""
     import uvicorn
 
-    uvicorn.run("contextflow.api.app:app", host=host, port=port, reload=False)
+    from contextflow.api.app import create_app
+
+    uvicorn.run(create_app(engine=local_workspace(workspace)), host=host, port=port)
 
 
 @app.command()
@@ -223,6 +226,12 @@ def mcp(
     ),
     host: str = typer.Option("127.0.0.1"),
     port: int = typer.Option(8765),
+    workspace: str = typer.Option(
+        ".contextflow",
+        "--path",
+        help="Workspace directory to use (pass an absolute path when an MCP "
+        "client like Claude Desktop launches this, since its working directory varies)",
+    ),
 ) -> None:
     """Run the MCP server so agents (Claude, Cursor, ...) can connect.
 
@@ -232,7 +241,7 @@ def mcp(
     """
     from contextflow.mcp.server import main as mcp_main
 
-    mcp_main(transport=transport, host=host, port=port)
+    mcp_main(transport=transport, host=host, port=port, engine=local_workspace(workspace))
 
 
 auth_app = typer.Typer(help="Manage API keys shared by the REST API and MCP-over-HTTP.")
